@@ -27,6 +27,7 @@ enum movement_Type {
   turn_type
 };
 
+
 struct errorFuncTuple
 {
   std::function<void()> func;
@@ -36,8 +37,6 @@ struct errorFuncTuple
   errorFuncTuple(std::function<void()> func, double onError, bool called) : 
    func(func), onError(onError), called(called){}
 };
-
-
 
 void onError_fn(void* param);
 
@@ -50,20 +49,6 @@ struct PIDprofile
   double kD;
   double kD_a;
   double kP_d;
-
- /*  
-  PIDprofile(){}
-
-  PIDprofile(double kP, double kP_a, double kI, double kI_a, double kD, double kD_a, double kP_d) :
-  kP(kP), kP_a(kP_a), kI(kI), kI_a(kI_a), kD(kD_a), kP_d(kP_d){}
-
-  PIDprofile(double kP, double kP_a, double kI, double kI_a, double kD, double kD_a) :
-  kP(kP), kP_a(kP_a), kI(kI), kI_a(kI_a), kD(kD_a){}
-
-  PIDprofile(double kP, double kI, double kD) :
-  kP(kP), kI(kI), kD(kD) {}
- */
-
 };
 
 struct slewProfile
@@ -189,7 +174,6 @@ class Drive{
  double actualVelocityRight();
  double actualVelocityAll();
 
- //On Error
  /* The onError vector */
  std::vector<errorFuncTuple> onErrorVector;
  void addErrorFunc(double onError, void input());
@@ -204,11 +188,24 @@ class Drive{
  //Swerve Movemnet Function                 
  double swerve(Direction dir, double target, double target_a, double timeOut, double maxVel, 
                  double maxVel_a);
+ 
+ /*ODOMETRY*/
 
- //P Based brake loop
+ /* Movement Functions, Return error after movement is finished */
+ double move_to(Direction dir, Coord targetPoint, double timeOut, double maxVelocity);
+ double turn_to(Direction dir, Coord targetPoint, double timeOut, double maxVelocity);
+
+ /*Hardstop fn for PID motion chaining*/ 
+ double hardStop_at(Direction dir, Coord cutOffPoint, Coord targetPoint, double maxVelocity);
+  
+ /*Swerve Movemnet Function*/                 
+ double swerve_To(Direction dir, Pose targetPose, double timeOut, double maxVel, double maxVel_a);
+
+ /*P Based brake loop*/
  double brake(double timeOut);
 };
 
-//Drive object instance declartion defined in auton and can be used anywhere 
+/*Drive object instance declartion*/
+
 extern Drive drive;
 

@@ -15,11 +15,10 @@ autonTextTuple autos[AUTO_COUNT] = {
     {tune,     "Tune"       }
 };
 
-Drive drive(leftMotors, rightMotors, imu);
+Drive drive(leftMotors, rightMotors, Odometry(verticalTracker, horizontalTracker, imu));
 
 void winPoint(){
  pros::Task runOnError(onError_fn);
-
 
  runOnError.remove();
  drive.onErrorVector.clear();

@@ -6,7 +6,7 @@ class Odometry{
  private:
  pros::Rotation* vertical;
  pros::Rotation* horizontal;
- pros::Imu& imu;
+ pros::Imu* imu;
  Pose pose = Pose(0, 0, 0);
  pros::Task *OdomTask = nullptr;
  float lastAngle = 0;
@@ -15,7 +15,11 @@ class Odometry{
  float calcDeltaTheta(pros::Rotation &tracker1, pros::Rotation &tracker2);
 
  public:
- Odometry(pros::Rotation* &vertical, pros::Rotation* &horizontal, pros::Imu &imu);
+ Odometry(pros::Rotation &vertical, pros::Rotation &horizontal, pros::Imu &imu){
+  this->vertical = &vertical;
+  this->horizontal = &vertical;
+  this->imu        = &imu;
+ }
  void init();
  void calibrate(bool calibrateIMUs = true);
  void update();

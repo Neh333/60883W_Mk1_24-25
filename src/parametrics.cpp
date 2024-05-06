@@ -30,7 +30,6 @@ Coord Coord::rotate(float angle) const {
                  this->x * std::sin(angle) + this->y * std::cos(angle));
 }
 
-
 float getCurvature(Pose pose, Pose other) {
     // calculate whether the pose is on the left or right side of the circle
     float side = sgn(std::sin(pose.theta) * (other.x - pose.x) - std::cos(pose.theta) * (other.y - pose.y));
