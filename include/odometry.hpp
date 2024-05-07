@@ -1,10 +1,9 @@
 #include "main.h"
 #include "pros/rotation.hpp"
 #include "parametrics.hpp"
+
 class Odometry{
  private:
- pros::Rotation* vertical;
- pros::Rotation* horizontal;
  double wheelSize;
  
  pros::Task *OdomTask = nullptr;
@@ -21,12 +20,18 @@ class Odometry{
   this->imu        = &imu;
  }
  
+ pros::Rotation* vertical;
+ pros::Rotation* horizontal;
  pros::Imu* imu;
  Pose pose = Pose(0, 0, 0);
+
+ double degreeToInch(double deg);
+ double inchToDegree(double inch);
+
+ int getVertPos();
+ int getHoriPos();
 
  void init();
  void calibrate(bool calibrateIMU = true);
  void update();
- 
 };
-extern Odometry odom;

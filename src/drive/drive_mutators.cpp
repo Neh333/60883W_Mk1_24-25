@@ -17,7 +17,6 @@ void Drive::setPID(uint8_t n)
   kP_d = PIDConstants[n].kP_d;
 }
 
-
 /* Use specified PID constants */
 void Drive::setCustomPID(PIDprofile profile)
 {
@@ -30,22 +29,30 @@ void Drive::setCustomPID(PIDprofile profile)
   kP_d = profile.kP_d;
 }
 
-
 void Drive::setScheduledConstants(PIDprofile constants)
 {
   scheduledConstants = constants;
 }
 
+void Drive::setScheduledSwerveConstants(PIDprofile constants)
+{
+  scheduledSwerveConstants = constants;
+}
 
 void Drive::setScheduleThreshold_l(double error)
 {
   scheduleThreshold_l = error;
 }
 
-
 void Drive::setScheduleThreshold_a(double error)
 {
   scheduleThreshold_a = error;
+}
+
+void Drive::setScheduleThresholds_s(double error, double error_a)
+{
+  swerveThresholds.first  = error;
+  swerveThresholds.second = error_a;
 }
 
 void Drive::setMaxVelocity(float velocity) {

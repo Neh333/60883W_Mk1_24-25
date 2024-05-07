@@ -3,6 +3,7 @@
 #include "parametrics.hpp"
 #include "odometry.hpp"
 #include "util.hpp"
+#include <utility>
 
 #define INTEGRAL_MAX 10000.0
 #define NO_SCHEDULING -1.f
@@ -88,9 +89,11 @@ class Drive{
 
  double kP, kP_a, kI, kI_a, kD, kD_a, kP_d;
 
- PIDprofile scheduledConstants;
+ PIDprofile scheduledConstants, scheduledSwerveConstants;
  
  double scheduleThreshold_l, scheduleThreshold_a; 
+
+ std::pair<double, double> swerveThresholds; //{L, A}
   
  double error;
   
@@ -102,12 +105,12 @@ class Drive{
   
  /*Standstill variable declerations*/
  double maxStepDistance = 2;
- double maxStepTurn = 0.2;
+ double maxStepTurn     = 0.2;
 
- double SSMaxCount = 7;
+ double SSMaxCount   = 7;
  double SSMaxCount_t = 7;
 
- bool SSActive = true;
+ bool SSActive   = true;
  bool SSActive_t = true;
   
  /*on error flag*/
@@ -119,7 +122,6 @@ class Drive{
  void updateIntegral(double error, double lastError, double activeDistance, double& integral);
  void updateStandstill(movement_Type type, bool& standStill, double error, double lastError,
                          uint8_t& standStillCount);
-
  void calculateSlew(double *voltage, double actualVelocity, slewProfile *profile);
 
  /*"Virtual" Drivetrain methods*/
@@ -134,15 +136,16 @@ class Drive{
  struct slewProfile slewProf_a;
 
  public:
-
  /*Drive object constructors*/ 
  Drive(pros::MotorGroup &leftMotors, pros::MotorGroup &rightMotors, pros::Imu &imu);
- Drive(pros::MotorGroup &leftMotors, pros::MotorGroup &rightMotors, Odometry odometry);
+ Drive(pros::MotorGroup &leftMotors, pros::MotorGroup &rightMotors, Odometry* odometry);
 
  /*"Virtual" Drivetrain attributes and methods*/ 
  pros::MotorGroup *rightMotors;
  pros::MotorGroup *leftMotors;
  pros::Imu        *imu;
+ 
+ class Odometry* odom;
 
  void setBrakeMode(pros::motor_brake_mode_e brakeMode);
 
@@ -158,8 +161,11 @@ class Drive{
  void setCustomPID(PIDprofile profile);
 
  void setScheduledConstants(PIDprofile constants);
+ void setScheduledSwerveConstants(PIDprofile constants);
+
  void setScheduleThreshold_l(double error);
  void setScheduleThreshold_a(double error);
+ void setScheduleThresholds_s(double error, double error_a);
 
  void setSlew(slewProfile profile);
  void setSlew_a(slewProfile profile);

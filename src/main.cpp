@@ -13,17 +13,18 @@ uint8_t auton = AUTO_NUMBER;
 		case 2:  controller.print(2, 0, "Right Side  %.2f                       ",imu.get_heading()); break;\
 		case 3:  controller.print(2, 0, "Left Elims  %.2f                       ",imu.get_heading()); break;\
 		case 4:  controller.print(2, 0, "Right Elims %.2f                       ",imu.get_heading()); break;\
-    case 5:  controller.print(2, 0, "Skills %.2f                            ",imu.get_heading()); break;\
-		case 6:  controller.print(2, 0, "Nothing %.2f                           ",imu.get_heading()); break;\
-    case 7:  controller.print(2, 0, "Tune %.2f                              ",imu.get_heading()); break;\
+    case 5:  controller.print(2, 0, "Skills      %.2f                       ",imu.get_heading()); break;\
+		case 6:  controller.print(2, 0, "Nothing     %.2f                       ",imu.get_heading()); break;\
+    case 7:  controller.print(2, 0, "Tune        %.2f                       ",imu.get_heading()); break;\
 	}\
 }\
 
 void initialize(){
 	//initBarGraph();
 	//pros::Task brainDisplayTask(updateBarGraph_fn);
+  controller.clear();
 	drive.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
-    hang.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+  hang.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 	imu.reset();
 	if(imu.get_heading() || imu.get_rotation() > 0.5){
 		imu.reset(); 
@@ -92,7 +93,7 @@ void opcontrol() {
      
      /*Reset all sensors*/
      if(controller.get_digital_new_press(DIGITAL_UP)){
-        odom.calibrate();
+        drive.odom->calibrate();
         while(drive.imu->is_calibrating()){
          controller.print(2,0,"Calibrating");
          pros::delay(20);
@@ -100,10 +101,17 @@ void opcontrol() {
      }
      
      /*Calibrate Odom*/
-     else if (controller.get_digital_new_press(DIGITAL_X)){odom.calibrate(false);}
+     else if (controller.get_digital_new_press(DIGITAL_X)){drive.odom->calibrate(false);}
 
      /*DRIVER CONTROL */
      arcade_standard(5);
+
+
+     /*Debugging*/
+     controller.print(4, 0, "vert val: %.2f     ", drive.odom->getVertPos());
+     controller.print(5, 0, "hori val: %.2f     ", drive.odom->getHoriPos());
+     controller.print(6, 0, "X:        %.2f     ", drive.odom->pose.x);
+     controller.print(6, 0, "Y:        %.2f     ", drive.odom->pose.y);
      
      pros::delay(20);
     }

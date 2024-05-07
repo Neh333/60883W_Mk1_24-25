@@ -206,6 +206,7 @@ double Drive::hardStop(Direction dir, double targetCutOff, double target, double
 }
 
 //TO DO: potentailly add scheduling 
+
 /* Swerve movement */
 double Drive::swerve(Direction dir, double target, double target_a, double timeOut, double maxVel, double maxVel_a){
   /* Error values */
@@ -292,7 +293,6 @@ double Drive::swerve(Direction dir, double target, double target_a, double timeO
     /* Give PROS time to keep itself in order */
     pros::delay(20);
   }
-  
   /* Tell the onError task that the PID is over, then return the error at time of exit */
   moveDriveVoltage(0);
   isNewPID = false;

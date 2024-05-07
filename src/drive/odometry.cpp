@@ -2,12 +2,31 @@
 #include "parametrics.hpp"
 #include "include.hpp"
 
+double Odometry::degreeToInch(double deg) {
+  return (deg * 360/((wheelSize*M_PI)));
+}
+
+double Odometry::inchToDegree(double inch) {
+  return (inch / 360/((wheelSize*M_PI)));
+}
+
+int Odometry::getVertPos(){
+  return (this->vertical->get_position());
+}
+
+int Odometry::getHoriPos(){
+  return (this->horizontal->get_position());
+}
 
 void Odometry::init(){
  if (OdomTask == nullptr) {
      OdomTask = new pros::Task([this]() {
      while (true) {
       update();
+      controller.print(4, 0, "vert val: %.2f     ", getVertPos());
+      controller.print(5, 0, "hori val: %.2f     ", getHoriPos());
+      controller.print(6, 0, "X:        %.2f     ", pose.x);
+      controller.print(6, 0, "Y:        %.2f     ", pose.y);
       pros::delay(10);
      }
      });
@@ -39,9 +58,9 @@ double Drive::move_to(Direction dir, Coord targetPoint, double timeOut, double m
  double lastError;
  double errorDrift;
  double proportionDrift;
- const double initialHeading = imu->get_heading();
- const double initialMotorAvg = driveAvgPos();
- const double tickTarget = inchToTick(odom.pose.distance(Pose(targetPoint)));
+ const double initialHeading = imu->get_heading(); //inital theta
+ const double initialVertical = odom->getVertPos();
+ const double tickTarget = odom->inchToDegree((odom->pose.distance(Pose(targetPoint))));
  /* Scheduling variables */
  bool scheduled = (scheduleThreshold_l == NO_SCHEDULING);
  double myKP = this->kP, myKI = this->kI, myKD = this->kD;
@@ -71,7 +90,7 @@ double Drive::move_to(Direction dir, Coord targetPoint, double timeOut, double m
      }
 
      /* Update error, do actual PID calculations, adjust for slew, and clamp the resulting value */
-     error = tickTarget - fabs(driveAvgPos() - initialMotorAvg);
+     error = tickTarget - fabs(odom->getVertPos() - initialVertical);
      finalVolt = updatePID(myKP, myKI, myKD, error, lastError, integral, integralActive);
      calculateSlew(&finalVolt, actualVelocityAll(), &slewProf);
      finalVolt = std::clamp(finalVolt, -maxVolt, maxVolt);
@@ -104,8 +123,8 @@ double Drive::move_to(Direction dir, Coord targetPoint, double timeOut, double m
 }
 
 double Drive::turn_to(Direction dir, Coord targetPoint, double timeOut, double maxVelocity){
-  double target = targetPoint.angle(odom.pose);
   double lastError;
+  double target = targetPoint.angle(odom->pose);
   const double initialAngle = imu->get_rotation() + 360;
   /* Scheduling variables */
   bool scheduled = (scheduleThreshold_a == NO_SCHEDULING);
@@ -135,6 +154,7 @@ double Drive::turn_to(Direction dir, Coord targetPoint, double timeOut, double m
 
   /* Begin PID */
   while((pros::millis() < endTime && !standStill)){
+
     if(!scheduled && fabs(error) < scheduleThreshold_a)
     {
       myKP = scheduledConstants.kP_a;
@@ -177,9 +197,9 @@ double Drive::hardStop_at(Direction dir, Coord cutOffPoint, Coord targetPoint, d
  double proportionDrift;
  double lastError;
  const double initialHeading = imu->get_heading();
- const double initialMotorAvg = driveAvgPos();
- const double tickTarget = inchToTick(odom.pose.distance(Pose(targetPoint)));
- const double tickTargetCutOff = inchToTick(odom.pose.distance(Pose(cutOffPoint)));
+ const double initalVertical = odom->getVertPos();
+ const double tickTarget = odom->inchToDegree(odom->pose.distance(Pose(targetPoint)));
+ const double tickTargetCutOff = odom->inchToDegree(odom->pose.distance(Pose(cutOffPoint)));
  /* Scheduling variables */
  bool scheduled = (scheduleThreshold_l == NO_SCHEDULING);
  double myKP = this->kP, myKI = this->kI, myKD = this->kD;
@@ -194,8 +214,8 @@ double Drive::hardStop_at(Direction dir, Coord cutOffPoint, Coord targetPoint, d
  isNewPID = true;
 
  //Begin PID
- while(tickTargetCutOff > fabs(driveAvgPos()-initialMotorAvg)){
-      /* Maybe schedule constants */
+ while(tickTargetCutOff > fabs(odom->getVertPos() - initalVertical)){
+
       if(!scheduled && fabs(error) < scheduleThreshold_l){
       myKP = scheduledConstants.kP;
       myKI = scheduledConstants.kI;
@@ -203,7 +223,7 @@ double Drive::hardStop_at(Direction dir, Coord cutOffPoint, Coord targetPoint, d
       scheduled = true;
      }
 
-     error = tickTarget - fabs(driveAvgPos() - initialMotorAvg);
+     error = tickTarget - fabs(odom->getVertPos() - initalVertical);
     
      //update the PD values
      double zero = 0;
@@ -232,5 +252,71 @@ double Drive::hardStop_at(Direction dir, Coord cutOffPoint, Coord targetPoint, d
 }
                  
 double Drive::swerve_To(Direction dir, Pose targetPose, double timeOut, double maxVel, double maxVel_a){
+ /* Error values */
+ double error_a;
+ double lastError;
+ double lastError_a;
+ double target_a = targetPose.angle(odom->pose);
+ const double initalVertical = odom->getVertPos();
+ const double tickTarget = odom->inchToDegree(odom->pose.distance(targetPose));
+ const double initialAngle = imu->get_rotation() + 360;
 
+ /* Scheduling variables */
+ bool scheduled = swerveThresholds.first == NO_SCHEDULING;
+ bool scheduled_a = swerveThresholds.second == NO_SCHEDULING;
+ double myKP = this->kP, myKI = this->kI, myKD = this->kD;
+ double myKP_a = this->kP_a, myKI_a = this->kI_a, myKD_a = this->kD_a;
+
+ /* Integral declarations */
+ double integral = 0;
+ double integral_a = 0;
+
+ /* Motor output variable declarations */
+ maxVolt = percentToVoltage(maxVel);
+ maxVolt_a = percentToVoltage(maxVel_a);;
+ double workingVolt;
+ double finalVoltLeft;
+ double finalVoltRight;
+
+ /* Drive output multipliers */
+ const int8_t reverseVal = (dir == backwardLeft || dir == backwardRight || dir == backwardShortest)?(-1):(1);
+ int8_t reverseVal_a = (dir == backwardRight || dir == forwardRight)?(1):(-1);
+
+ /* Change the reverseVal and target if the direction input is shortest */
+ if(dir == forwardShortest || dir == backwardShortest){
+   target_a = fabs(fmod((target_a-imu->get_heading()+540),360) - 180);
+   reverseVal_a = sgn(target_a);
+   target_a = fabs(target_a);
+  }
+
+ /* Standstill variable declarations */
+ uint8_t standStillCount = 0;
+ uint8_t standStillCount_a = 0;
+ bool standStill = false;
+ bool standStill_a = false;
+
+ /* Tell the onError task that a new PID has begun, and set endTime */
+ isNewPID = true;
+ const uint32_t endTime = pros::millis() + timeOut*1000;
+
+ /* Begin PID */
+ while(pros::millis() < endTime && !(standStill && standStill_a)) {
+   if(!scheduled && fabs(error) < swerveThresholds.first){
+     myKP = scheduledSwerveConstants.kP;
+     myKI = scheduledSwerveConstants.kI;
+     myKD = scheduledSwerveConstants.kD;
+     scheduled = true;
+    }
+
+    if(!scheduled && fabs(error_a) < swerveThresholds.second){
+      myKP_a = scheduledSwerveConstants.kP_a;
+      myKI_a = scheduledSwerveConstants.kI_a;
+      myKD_a = scheduledSwerveConstants.kD_a;
+      scheduled_a = true;
+    }
+  } 
+ /* Tell the onError task that the PID is over, then return the error at time of exit */
+ moveDriveVoltage(0);
+ isNewPID = false;
+ return tickToInch(error);
 }
