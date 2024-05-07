@@ -19,7 +19,6 @@ uint8_t auton = AUTO_NUMBER;
 	}\
 }\
 
-
 void initialize(){
 	//initBarGraph();
 	//pros::Task brainDisplayTask(updateBarGraph_fn);
@@ -31,7 +30,6 @@ void initialize(){
 	}
 } 
 
-
 void disabled(){
 	while(true){
     AUTO_SWITCH()
@@ -42,7 +40,6 @@ void disabled(){
 	}
 }
 
-
 void competition_initialize(){
 	while(true){
 		//Change auton value
@@ -51,7 +48,6 @@ void competition_initialize(){
 		pros::delay(20);
 	}
 }
-
 
 void autonomous(){
   /* Run the auton currently selected and displayed */
@@ -87,24 +83,26 @@ void opcontrol() {
      /*Display current autonomous on the controller*/
      AUTO_SWITCH()
 
-     //Change auton value
+     /*Change auton value*/
      if(controller.get_digital_new_press(DIGITAL_LEFT)){auton--;}
      if(controller.get_digital_new_press(DIGITAL_RIGHT)){auton++;}
      
-     //Run the currently selected autonomous when UP is pressed
-     if(controller.get_digital_new_press(DIGITAL_UP)){autonomous();}
+     /*Run the currently selected autonomous when UP is pressed*/
+     if(controller.get_digital_new_press(DIGITAL_DOWN)){autonomous();}
      
-     //Reset the IMU when the down button is called
-     if(controller.get_digital_new_press(DIGITAL_DOWN)){
-        imu.reset();
-        float iter = 0;
-        while(imu.is_calibrating()){
-         controller.print(2,0,"Calibrating: %.2f    ", iter/5);
+     /*Reset all sensors*/
+     if(controller.get_digital_new_press(DIGITAL_UP)){
+        odom.calibrate();
+        while(drive.imu->is_calibrating()){
+         controller.print(2,0,"Calibrating");
          pros::delay(20);
         }
      }
      
-     //DRIVER CONTROL 
+     /*Calibrate Odom*/
+     else if (controller.get_digital_new_press(DIGITAL_X)){odom.calibrate(false);}
+
+     /*DRIVER CONTROL */
      arcade_standard(5);
      
      pros::delay(20);

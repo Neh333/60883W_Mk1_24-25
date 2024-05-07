@@ -15,7 +15,9 @@ autonTextTuple autos[AUTO_COUNT] = {
     {tune,     "Tune"       }
 };
 
-Drive drive(leftMotors, rightMotors, Odometry(verticalTracker, horizontalTracker, imu));
+//Drive drive(leftMotors, rightMotors, imu); // 
+Odometry odom(verticalTracker, horizontalTracker, 2.0, imu);
+Drive drive(leftMotors, rightMotors, odom);
 
 void winPoint(){
  pros::Task runOnError(onError_fn);

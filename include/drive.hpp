@@ -100,7 +100,7 @@ class Drive{
  double maxVolt;
  double maxVolt_a;
   
- // Standstill variable declerations
+ /*Standstill variable declerations*/
  double maxStepDistance = 2;
  double maxStepTurn = 0.2;
 
@@ -110,10 +110,10 @@ class Drive{
  bool SSActive = true;
  bool SSActive_t = true;
   
- //on error flag
+ /*on error flag*/
  bool isNewPID = false;
   
- //PID updater methods 
+ /*PID updater methods*/ 
  double updatePID(double KP, double KI, double KD, double error, double lastError, double &integral, 
                  double integralActive);
  void updateIntegral(double error, double lastError, double activeDistance, double& integral);
@@ -134,7 +134,8 @@ class Drive{
  struct slewProfile slewProf_a;
 
  public:
- /*Drive object constructor*/ 
+
+ /*Drive object constructors*/ 
  Drive(pros::MotorGroup &leftMotors, pros::MotorGroup &rightMotors, pros::Imu &imu);
  Drive(pros::MotorGroup &leftMotors, pros::MotorGroup &rightMotors, Odometry odometry);
 
@@ -169,7 +170,7 @@ class Drive{
  const double getError();
  const bool getPIDStatus();
 
- // returns a float between -200 and 200
+ /*returns a float between -200 and 200*/
  double actualVelocityLeft();
  double actualVelocityRight();
  double actualVelocityAll();
@@ -182,12 +183,15 @@ class Drive{
  double move(Direction dir, double target, double timeOut, double maxVelocity);
  double turn(Direction dir, double target, double timeOut, double maxVelocity);
 
- //Hardstop fn for PID motion chaining 
+ /*Hardstop fn for PID motion chaining*/ 
  double hardStop(Direction dir, double targetCutOff, double target, double maxVelocity);
   
- //Swerve Movemnet Function                 
+ /*Swerve Movemnet Function*/                 
  double swerve(Direction dir, double target, double target_a, double timeOut, double maxVel, 
                  double maxVel_a);
+ 
+ /*P Based brake loop*/
+ double brake(double timeOut);
  
  /*ODOMETRY*/
 
@@ -200,12 +204,8 @@ class Drive{
   
  /*Swerve Movemnet Function*/                 
  double swerve_To(Direction dir, Pose targetPose, double timeOut, double maxVel, double maxVel_a);
-
- /*P Based brake loop*/
- double brake(double timeOut);
 };
 
 /*Drive object instance declartion*/
-
 extern Drive drive;
 

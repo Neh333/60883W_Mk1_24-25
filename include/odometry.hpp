@@ -1,13 +1,12 @@
 #include "main.h"
 #include "pros/rotation.hpp"
 #include "parametrics.hpp"
-
 class Odometry{
  private:
  pros::Rotation* vertical;
  pros::Rotation* horizontal;
- pros::Imu* imu;
- Pose pose = Pose(0, 0, 0);
+ double wheelSize;
+ 
  pros::Task *OdomTask = nullptr;
  float lastAngle = 0;
 
@@ -15,13 +14,19 @@ class Odometry{
  float calcDeltaTheta(pros::Rotation &tracker1, pros::Rotation &tracker2);
 
  public:
- Odometry(pros::Rotation &vertical, pros::Rotation &horizontal, pros::Imu &imu){
-  this->vertical = &vertical;
+ Odometry(pros::Rotation &vertical, pros::Rotation &horizontal, double wheelSize, pros::Imu &imu){
+  this->vertical   = &vertical;
   this->horizontal = &vertical;
+  this->wheelSize  = wheelSize;
   this->imu        = &imu;
  }
- void init();
- void calibrate(bool calibrateIMUs = true);
- void update();
+ 
+ pros::Imu* imu;
+ Pose pose = Pose(0, 0, 0);
 
+ void init();
+ void calibrate(bool calibrateIMU = true);
+ void update();
+ 
 };
+extern Odometry odom;
