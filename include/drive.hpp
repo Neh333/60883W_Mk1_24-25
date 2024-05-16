@@ -199,7 +199,7 @@ class Drive{
  /*P Based brake loop*/
  double brake(double timeOut);
  
- /*ODOMETRY*/
+ /************************************************ODOMETRY*************************************************************/
 
  /* Movement Functions, Return error after movement is finished */
  double move_to(Direction dir, Coord targetPoint, double timeOut, double maxVelocity);

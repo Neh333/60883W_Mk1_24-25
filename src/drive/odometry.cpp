@@ -3,19 +3,19 @@
 #include "include.hpp"
 
 double Odometry::degreeToInch(double deg) {
-  return (deg * 360/((wheelSize*M_PI)));
+  return (deg * (360 / (wheelDiameter*M_PI)) );
 }
 
 double Odometry::inchToDegree(double inch) {
-  return (inch / 360/((wheelSize*M_PI)));
+  return (inch / (360 / (wheelDiameter*M_PI)) );
 }
 
 int Odometry::getVertPos(){
-  return (this->vertical->get_position());
+  return (this->vertical->get_position()/100);
 }
 
 int Odometry::getHoriPos(){
-  return (this->horizontal->get_position());
+  return (this->horizontal->get_position()/100);
 }
 
 void Odometry::init(){
@@ -45,12 +45,73 @@ void Odometry::calibrate(bool calibrateIMU){
  }
 }
 
-void Odometry::update(){
-    double lastX, lastY;
-    double x, y;
-    double theta;
+/*Prev vars*/
+float prevVertical = 0;
+float prevHorizontal = 0;
+float prevImu = 0;
 
-    this->pose = Pose(x,y,theta);
+void Odometry::update(){
+
+    /*get the current sensor values*/
+    float verticalRaw = 0;
+    float horizontalRaw = 0;
+    float imuRaw = 0;
+
+    verticalRaw = degreeToInch(getVertPos());
+    horizontalRaw = degreeToInch(getHoriPos());
+   
+    degToRad(imu->get_rotation());
+
+    // calculate the change in sensor values
+    float deltaVertical = verticalRaw - prevVertical;
+    float deltaHorizontal = horizontalRaw - prevHorizontal;
+    float deltaImu = imuRaw - prevImu;
+
+    // update the previous sensor values
+    prevVertical = verticalRaw;
+    prevHorizontal = horizontalRaw;
+    prevImu = imuRaw;
+
+    float heading = pose.theta;
+
+    /* calculate the heading using the horizontal tracking wheels*/
+    heading -=  deltaHorizontal / horizontalOffset;
+
+    /*use the vertical tracking wheels*/
+    heading -= deltaVertical / verticalOffset;
+
+    /*use the IMU*/
+    heading += deltaImu;
+
+    float deltaHeading = heading - pose.theta;
+    float avgHeading = pose.theta + deltaHeading / 2;
+
+    // calculate change in x and y
+    float deltaX = 0;
+    float deltaY = 0;
+    deltaY = verticalRaw - prevVertical;
+    deltaX = horizontalRaw - prevHorizontal;
+
+    // calculate local x and y
+    float localX = 0;
+    float localY = 0;
+    if (deltaHeading == 0) { /* prevent divide by 0*/
+        localX = deltaX;
+        localY = deltaY;
+    } else {
+        localX = 2 * sin(deltaHeading / 2) * (deltaX / deltaHeading + horizontalOffset);
+        localY = 2 * sin(deltaHeading / 2) * (deltaY / deltaHeading + verticalOffset);
+    }
+
+    // save previous pose
+    Pose prevPose = pose;
+
+    // calculate global x and y
+    pose.x += localY * sin(avgHeading);
+    pose.y += localY * cos(avgHeading);
+    pose.x += localX * -cos(avgHeading);
+    //pose += localX * sin(avgHeading); //look at what this does exactly and implementing
+    pose.theta = heading;
 }
 
 double Drive::move_to(Direction dir, Coord targetPoint, double timeOut, double maxVelocity){
@@ -250,7 +311,9 @@ double Drive::hardStop_at(Direction dir, Coord cutOffPoint, Coord targetPoint, d
  //Exit the function
  return tickToInch(error);
 }
-                 
+
+
+//TO DO: FINISH                 
 double Drive::swerve_To(Direction dir, Pose targetPose, double timeOut, double maxVel, double maxVel_a){
  /* Error values */
  double error_a;
@@ -314,6 +377,8 @@ double Drive::swerve_To(Direction dir, Pose targetPose, double timeOut, double m
       myKD_a = scheduledSwerveConstants.kD_a;
       scheduled_a = true;
     }
+
+    
   } 
  /* Tell the onError task that the PID is over, then return the error at time of exit */
  moveDriveVoltage(0);

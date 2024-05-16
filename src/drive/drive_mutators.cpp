@@ -64,17 +64,14 @@ void Drive::setMaxTurnVelocity(float velocity) {
 }
 
 /* Update slewProf given profile */
-void Drive::setSlew(slewProfile profile)
-{
+void Drive::setSlew(slewProfile profile) {
   slewProf = profile;
 }
 
 /* Update slewProf given profile */
-void Drive::setSlew_a(slewProfile profile)
-{
+void Drive::setSlew_a(slewProfile profile) {
   slewProf_a = profile;
 }
-
 
 void Drive::setStandStill(movement_Type type, uint8_t maxCycles, float maxStep) {
  if (type == lateral) {

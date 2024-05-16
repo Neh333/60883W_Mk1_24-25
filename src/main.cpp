@@ -106,7 +106,6 @@ void opcontrol() {
      /*DRIVER CONTROL */
      arcade_standard(5);
 
-
      /*Debugging*/
      controller.print(4, 0, "vert val: %.2f     ", drive.odom->getVertPos());
      controller.print(5, 0, "hori val: %.2f     ", drive.odom->getHoriPos());

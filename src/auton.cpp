@@ -16,7 +16,7 @@ autonTextTuple autos[AUTO_COUNT] = {
 };
 
 //Drive drive(leftMotors, rightMotors, imu); // none odom to tune and relative movements
-Odometry odom(verticalTracker, horizontalTracker, 2.0, imu);
+Odometry odom(verticalTracker, 0, horizontalTracker, 0, 2.0, imu);
 Drive drive(leftMotors, rightMotors, &odom);
 
 void winPoint(){

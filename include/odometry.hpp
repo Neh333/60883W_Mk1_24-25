@@ -4,7 +4,7 @@
 
 class Odometry{
  private:
- double wheelSize;
+ double wheelDiameter, verticalOffset, horizontalOffset;
  
  pros::Task *OdomTask = nullptr;
  float lastAngle = 0;
@@ -13,11 +13,15 @@ class Odometry{
  float calcDeltaTheta(pros::Rotation &tracker1, pros::Rotation &tracker2);
 
  public:
- Odometry(pros::Rotation &vertical, pros::Rotation &horizontal, double wheelSize, pros::Imu &imu){
+ Odometry(pros::Rotation &vertical, double verticalOffset, pros::Rotation &horizontal, double horizontalOffset,
+            double wheelDiameter, pros::Imu &imu){
   this->vertical   = &vertical;
   this->horizontal = &vertical;
-  this->wheelSize  = wheelSize;
   this->imu        = &imu;
+  this->verticalOffset = verticalOffset;
+  this->horizontalOffset = horizontalOffset;
+  this->wheelDiameter  = wheelDiameter;
+
  }
  
  pros::Rotation* vertical;

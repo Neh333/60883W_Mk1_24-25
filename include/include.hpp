@@ -3,7 +3,6 @@
 #include "math.h"
 #define MIN(a,b) ((a)<(b)?(a):(b)) //takes param "A" & "B" if A is less than B then A if not then B 
 #define MAX(a,b) ((a)>(b)?(a):(b)) //takes param "A" & "B" if A is greather than than B then A if not then B 
-#define Pi 3.1415926535 //Macro for using Pi 
 #define AUTO_COUNT 8
 
 struct autonTextTuple

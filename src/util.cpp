@@ -60,3 +60,7 @@ double voltageToVelocity(double voltage) {
 double velocityToVoltage(double velocity) {
    return (velocity * 60);
 }
+
+double radToDeg(double radian){return (radian * (180 / M_PI));}
+
+double degToRad(double degree){return (degree * (M_PI / 180));}
