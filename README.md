@@ -1,7 +1,5 @@
 TO DO:
 
-Tracking alg
-
 Boomerang Swerve 
 
 Test Tracking and all movements relative and absolute 
