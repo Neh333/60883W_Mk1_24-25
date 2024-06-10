@@ -209,7 +209,7 @@ class Drive{
  double hardStop_at(Direction dir, Coord cutOffPoint, Coord targetPoint, double maxVelocity);
   
  /*Swerve Movemnet Function*/                 
- double swerve_To(Direction dir, Pose targetPose, double timeOut, double maxVel, double maxVel_a);
+ double swerve_To(Direction dir, Pose targetPose, double timeOut, double maxVel, double maxVel_a, double dlead);
 };
 
 /*Drive object instance declartion*/

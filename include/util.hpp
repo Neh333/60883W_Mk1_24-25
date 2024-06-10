@@ -1,5 +1,4 @@
 #pragma once
-#include <string>
 #define LAMBDA(func) [](){func;}
 
 int sgn(double x);

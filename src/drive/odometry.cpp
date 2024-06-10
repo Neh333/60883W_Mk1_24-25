@@ -10,12 +10,25 @@ double Odometry::inchToDegree(double inch) {
   return (inch / (360 / (wheelDiameter*M_PI)) );
 }
 
-int Odometry::getVertPos(){
+/*rot getters*/
+const int Odometry::getVertPos(){
   return (this->vertical->get_position()/100);
 }
 
-int Odometry::getHoriPos(){
+const int Odometry::getHoriPos(){
   return (this->horizontal->get_position()/100);
+}
+
+const int Odometry::getX(){
+  return this->pose.x;
+}
+
+const int Odometry::getY(){
+  return this->pose.y;
+}
+
+const Pose Odometry::getCurrentPose(){
+  return (this->pose);
 }
 
 void Odometry::init(){
@@ -121,7 +134,7 @@ double Drive::move_to(Direction dir, Coord targetPoint, double timeOut, double m
  double proportionDrift;
  const double initialHeading = imu->get_heading(); //inital theta
  const double initialVertical = odom->getVertPos();
- const double tickTarget = odom->inchToDegree((odom->pose.distance(Pose(targetPoint))));
+ const double tickTarget = odom->inchToDegree((odom->getCurrentPose().distance(Pose(targetPoint))));
  /* Scheduling variables */
  bool scheduled = (scheduleThreshold_l == NO_SCHEDULING);
  double myKP = this->kP, myKI = this->kI, myKD = this->kD;
@@ -185,7 +198,7 @@ double Drive::move_to(Direction dir, Coord targetPoint, double timeOut, double m
 
 double Drive::turn_to(Direction dir, Coord targetPoint, double timeOut, double maxVelocity){
   double lastError;
-  double target = targetPoint.angle(odom->pose);
+  double target = targetPoint.angle(odom->getCurrentPose());
   const double initialAngle = imu->get_rotation() + 360;
   /* Scheduling variables */
   bool scheduled = (scheduleThreshold_a == NO_SCHEDULING);
@@ -259,8 +272,8 @@ double Drive::hardStop_at(Direction dir, Coord cutOffPoint, Coord targetPoint, d
  double lastError;
  const double initialHeading = imu->get_heading();
  const double initalVertical = odom->getVertPos();
- const double tickTarget = odom->inchToDegree(odom->pose.distance(Pose(targetPoint)));
- const double tickTargetCutOff = odom->inchToDegree(odom->pose.distance(Pose(cutOffPoint)));
+ const double tickTarget = odom->inchToDegree(odom->getCurrentPose().distance(Pose(targetPoint)));
+ const double tickTargetCutOff = odom->inchToDegree(odom->getCurrentPose().distance(Pose(cutOffPoint)));
  /* Scheduling variables */
  bool scheduled = (scheduleThreshold_l == NO_SCHEDULING);
  double myKP = this->kP, myKI = this->kI, myKD = this->kD;
@@ -314,15 +327,14 @@ double Drive::hardStop_at(Direction dir, Coord cutOffPoint, Coord targetPoint, d
 
 
 //TO DO: FINISH                 
-double Drive::swerve_To(Direction dir, Pose targetPose, double timeOut, double maxVel, double maxVel_a){
+double Drive::swerve_To(Direction dir, Pose targetPose, double timeOut, double maxVel, double maxVel_a, double dlead){
  /* Error values */
  double error_a;
  double lastError;
  double lastError_a;
- double target_a = targetPose.angle(odom->pose);
- const double initalVertical = odom->getVertPos();
- const double tickTarget = odom->inchToDegree(odom->pose.distance(targetPose));
- const double initialAngle = imu->get_rotation() + 360;
+ double target_a = targetPose.angle(odom->getCurrentPose());
+ 
+ const Pose initalPose = odom->getCurrentPose();
 
  /* Scheduling variables */
  bool scheduled = swerveThresholds.first == NO_SCHEDULING;
@@ -364,6 +376,7 @@ double Drive::swerve_To(Direction dir, Pose targetPose, double timeOut, double m
 
  /* Begin PID */
  while(pros::millis() < endTime && !(standStill && standStill_a)) {
+
    if(!scheduled && fabs(error) < swerveThresholds.first){
      myKP = scheduledSwerveConstants.kP;
      myKI = scheduledSwerveConstants.kI;
@@ -377,6 +390,19 @@ double Drive::swerve_To(Direction dir, Pose targetPose, double timeOut, double m
       myKD_a = scheduledSwerveConstants.kD_a;
       scheduled_a = true;
     }
+    
+    /*check to make sure if d needs to use init or current and adjust acordingly*/
+    const double d =  odom->getCurrentPose().distance(targetPose);
+
+    /* calculate the carrot point 
+    *
+    *
+    */
+    Coord carrot(targetPose.x - d * cos(targetPose.theta) * dlead,
+			           targetPose.y - d * sin(targetPose.theta) * dlead);
+
+    error = odom->getCurrentPose().distance(carrot);
+
 
     
   } 

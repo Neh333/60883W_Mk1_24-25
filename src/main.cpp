@@ -109,8 +109,8 @@ void opcontrol() {
      /*Debugging*/
      controller.print(4, 0, "vert val: %.2f     ", drive.odom->getVertPos());
      controller.print(5, 0, "hori val: %.2f     ", drive.odom->getHoriPos());
-     controller.print(6, 0, "X:        %.2f     ", drive.odom->pose.x);
-     controller.print(6, 0, "Y:        %.2f     ", drive.odom->pose.y);
+     controller.print(6, 0, "X:        %.2f     ", drive.odom->getX());
+     controller.print(6, 0, "Y:        %.2f     ", drive.odom->getY());
      
      pros::delay(20);
     }

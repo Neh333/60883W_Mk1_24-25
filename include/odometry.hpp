@@ -4,6 +4,8 @@
 
 class Odometry{
  private:
+ Pose pose = Pose(0, 0, 0);
+
  double wheelDiameter, verticalOffset, horizontalOffset;
  
  pros::Task *OdomTask = nullptr;
@@ -27,13 +29,16 @@ class Odometry{
  pros::Rotation* vertical;
  pros::Rotation* horizontal;
  pros::Imu* imu;
- Pose pose = Pose(0, 0, 0);
 
  double degreeToInch(double deg);
  double inchToDegree(double inch);
 
- int getVertPos();
- int getHoriPos();
+ const int getVertPos();
+ const int getHoriPos();
+ const int getX();
+ const int getY();
+
+ const Pose getCurrentPose();
 
  void init();
  void calibrate(bool calibrateIMU = true);
