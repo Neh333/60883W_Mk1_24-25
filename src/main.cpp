@@ -102,7 +102,7 @@ void opcontrol() {
      }
      
      /*Calibrate Odom*/
-     else if (controller.get_digital_new_press(DIGITAL_X)){drive.odom->calibrate(false);}
+     else if (controller.get_digital_new_press(DIGITAL_B)){drive.odom->calibrate(false);}
 
      /*DRIVER CONTROL */
      arcade_standard(5);
