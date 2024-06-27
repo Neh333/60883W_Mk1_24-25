@@ -1,6 +1,7 @@
 #include "main.h"
 #include "pros/rotation.hpp"
 #include "parametrics.hpp"
+#include <memory>
 
 class Odometry{
  private:
@@ -8,7 +9,7 @@ class Odometry{
 
  double wheelDiameter, verticalOffset, horizontalOffset;
  
- pros::Task *OdomTask = nullptr;
+ std::unique_ptr<pros::Task> OdomTask = nullptr;
  float lastAngle = 0;
 
  float calcDeltaTheta(std::vector<std::shared_ptr<pros::IMU>> &imu, bool update = true);
@@ -18,7 +19,7 @@ class Odometry{
  Odometry(pros::Rotation &vertical, double verticalOffset, pros::Rotation &horizontal, double horizontalOffset,
             double wheelDiameter, pros::Imu &imu){
   this->vertical   = &vertical;
-  this->horizontal = &vertical;
+  this->horizontal = &horizontal;
   this->imu        = &imu;
   this->verticalOffset = verticalOffset;
   this->horizontalOffset = horizontalOffset;

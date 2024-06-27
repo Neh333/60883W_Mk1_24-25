@@ -1,6 +1,8 @@
 #include "drive.hpp"
 #include "parametrics.hpp"
 #include "include.hpp"
+#include "pros/rtos.hpp"
+#include <memory>
 
 double Odometry::degreeToInch(double deg) {
   return (deg * (360 / (wheelDiameter*M_PI)) );
@@ -32,18 +34,16 @@ const Pose Odometry::getCurrentPose(){
 }
 
 void Odometry::init(){
- if (OdomTask == nullptr) {
-     OdomTask = new pros::Task([this]() {
-     while (true) {
-      update();
-      controller.print(4, 0, "vert val: %.2f     ", getVertPos());
-      controller.print(5, 0, "hori val: %.2f     ", getHoriPos());
-      controller.print(6, 0, "X:        %.2f     ", pose.x);
-      controller.print(6, 0, "Y:        %.2f     ", pose.y);
-      pros::delay(10);
-     }
-     });
-    }
+ if (OdomTask == nullptr) 
+ {
+    OdomTask = std::make_unique<pros::Task> ([this]() {
+      while (true) 
+      {
+        this->update();
+        pros::delay(20);
+      }
+    });
+  }
 }
 
 void Odometry::calibrate(bool calibrateIMU){

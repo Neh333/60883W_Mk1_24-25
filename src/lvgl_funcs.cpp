@@ -36,6 +36,7 @@ struct lvTemperatureBundle
 
 lv_obj_t* parent = lv_obj_create(lv_scr_act());
 
+/*
 const lvTemperatureBundle temperatureBundles[NUMBER_OF_MOTORS] = {
     {lv_bar_create(parent), lv_label_create(parent), lv_label_create(parent), std::string("FL"), &frontleft},
     {lv_bar_create(parent), lv_label_create(parent), lv_label_create(parent), std::string("ML"), &midleft},
@@ -44,9 +45,9 @@ const lvTemperatureBundle temperatureBundles[NUMBER_OF_MOTORS] = {
     {lv_bar_create(parent), lv_label_create(parent), lv_label_create(parent), std::string("MR"), &midright},
     {lv_bar_create(parent), lv_label_create(parent), lv_label_create(parent), std::string("BR"), &backright},
     {lv_bar_create(parent), lv_label_create(parent), lv_label_create(parent), std::string("I"),  &intake},
-    {lv_bar_create(parent), lv_label_create(parent), lv_label_create(parent), std::string("H"),  &hang}
+    {lv_bar_create(parent), lv_label_create(parent), lv_label_create(parent), std::string("H"),  &lift}
 };
-
+*/
 lv_style_t parentStyle;
 lv_style_t barStyle;
 lv_style_t barNormalStyle;
@@ -55,8 +56,7 @@ lv_style_t barDangerStyle;
 lv_style_t textStyle;
 
 
-/* Initialize a bar object 
-
+/* Initialize a bar object
 void setBarAttributes(lv_obj_t* barObj, lv_obj_t* allignTo, int offSet)
 {
     lv_bar_set_range(barObj, MIN_BAR_TEMP, MAX_BAR_TEMP);
@@ -65,7 +65,6 @@ void setBarAttributes(lv_obj_t* barObj, lv_obj_t* allignTo, int offSet)
     lv_obj_set_size(barObj, BAR_WIDTH, BAR_HEIGHT);
     lv_obj_align(barObj, allignTo, LV_ALIGN_IN_LEFT_MID, offSet, 0);
 }
-
 */
 
 
@@ -165,7 +164,8 @@ void setBarValAndColor(lv_obj_t *bar, lv_obj_t *temperatureLabel, int temperatur
 
 */
 
-/* Update the entire bar graph */
+/* Update the entire bar graph 
+
 
 
 void updateBarGraph()
@@ -176,7 +176,7 @@ void updateBarGraph()
         setBarValAndColor(temperatureBundles[i].bar, temperatureBundles[i].temperatureLabel, temp);
     }
 }
-
+*/
 /* Function to be passed to a task, updates the entire bar graph */
 
 void updateBarGraph_fn(void* param)

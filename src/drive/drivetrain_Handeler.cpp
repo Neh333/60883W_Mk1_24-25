@@ -16,7 +16,7 @@ Drive::Drive(pros::MotorGroup &leftMotors, pros::MotorGroup &rightMotors, pros::
  this->imu             = &imu;
 }
 
-Drive::Drive(pros::MotorGroup &leftMotors, pros::MotorGroup &rightMotors, Odometry* odometry){
+Drive::Drive(pros::MotorGroup &leftMotors, pros::MotorGroup &rightMotors, Odometry& odometry){
  setPID(1);
  setScheduleThreshold_l(NO_SCHEDULING);
  setScheduleThreshold_a(NO_SCHEDULING);
@@ -27,7 +27,8 @@ Drive::Drive(pros::MotorGroup &leftMotors, pros::MotorGroup &rightMotors, Odomet
 
  this->leftMotors      = &leftMotors;
  this->rightMotors     = &rightMotors;
- this->imu             = odometry->imu;
+ this->imu             = odometry.imu;
+ this->odom = &odometry;
 }
 
 /*********************************************************************************************************/

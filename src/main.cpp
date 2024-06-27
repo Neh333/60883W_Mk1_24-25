@@ -1,7 +1,7 @@
 #include "auton.hpp"
 #include "drive.hpp"
 #include "include.hpp"
-#include "lvgl_funcs.hpp"
+#include "lvgl_funcs.hpp"`
 
 #define AUTO_NUMBER 8
 uint8_t auton = AUTO_NUMBER; 
@@ -22,13 +22,11 @@ uint8_t auton = AUTO_NUMBER;
 void initialize(){
 	//initBarGraph();
 	//pros::Task brainDisplayTask(updateBarGraph_fn);
-  controller.clear();
+  controller.clear(); //fpr test
 	drive.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
-  hang.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+  lift.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+  
 	imu.reset();
-	if(imu.get_heading() || imu.get_rotation() > 0.5){
-		imu.reset(); 
-	}
 } 
 
 void disabled(){
@@ -80,6 +78,9 @@ void arcade_standard(double curve) {
 }
 
 void opcontrol() {
+  
+ drive.odom->init();
+  
  while (true) {
      /*Display current autonomous on the controller*/
      AUTO_SWITCH()
@@ -105,12 +106,31 @@ void opcontrol() {
 
      /*DRIVER CONTROL */
      arcade_standard(5);
+     if (controller.get_digital(DIGITAL_L1)) 
+     {
+       intake.move_voltage(12000);
+     }
+     else if (controller.get_digital(DIGITAL_L2)) 
+     {
+       intake.move_voltage(-12000);
+     }
+     else {intake.move_voltage(0);}
 
-     /*Debugging*/
-     controller.print(4, 0, "vert val: %.2f     ", drive.odom->getVertPos());
-     controller.print(5, 0, "hori val: %.2f     ", drive.odom->getHoriPos());
-     controller.print(6, 0, "X:        %.2f     ", drive.odom->getX());
-     controller.print(6, 0, "Y:        %.2f     ", drive.odom->getY());
+     if (controller.get_digital(DIGITAL_R1)) 
+     {
+       lift.move_voltage(12000);
+     }
+     else if (controller.get_digital(DIGITAL_R2)) 
+     {
+       lift.move_voltage(-12000);
+     }
+     else {lift.move_voltage(0);}
+
+     //Debugging 
+     controller.print(5, 0, "vert val: %.2f     ", drive.odom->getVertPos());
+     controller.print(6, 0, "hori val: %.2f     ", drive.odom->getHoriPos());
+     controller.print(7, 0, "X:        %.2f     ", drive.odom->getX());
+     controller.print(8, 0, "Y:        %.2f     ", drive.odom->getY());
      
      pros::delay(20);
     }
