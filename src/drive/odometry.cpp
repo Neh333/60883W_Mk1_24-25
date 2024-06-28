@@ -5,11 +5,11 @@
 #include <memory>
 
 double Odometry::degreeToInch(double deg) {
-  return (deg * (360 / (wheelDiameter*M_PI)) );
+  return (deg * ((wheelDiameter*M_PI)/360) );
 }
 
 double Odometry::inchToDegree(double inch) {
-  return (inch / (360 / (wheelDiameter*M_PI)) );
+  return (inch / ((wheelDiameter*M_PI)/360) );
 }
 
 /*rot getters*/
@@ -58,73 +58,57 @@ void Odometry::calibrate(bool calibrateIMU){
  }
 }
 
-/*Prev vars*/
-float prevVertical = 0;
-float prevHorizontal = 0;
-float prevImu = 0;
-
 void Odometry::update(){
+  /* Get the current sensor values */
+  float verticalRaw = degreeToInch(getVertPos());
+  float horizontalRaw = degreeToInch(getHoriPos());
+  float imuRaw = degToRad(imu->get_rotation());
 
-    /*get the current sensor values*/
-    float verticalRaw = 0;
-    float horizontalRaw = 0;
-    float imuRaw = 0;
+  // Calculate the change in sensor values
+  float deltaVertical = verticalRaw - prevVertical;
+  float deltaHorizontal = horizontalRaw - prevHorizontal;
+  float deltaImu = wrapAngle(imuRaw - prevImu);
 
-    verticalRaw = degreeToInch(getVertPos());
-    horizontalRaw = degreeToInch(getHoriPos());
-   
-    degToRad(imu->get_rotation());
+  // Update the previous sensor values
+  prevVertical = verticalRaw;
+  prevHorizontal = horizontalRaw;
+  prevImu = imuRaw;
 
-    // calculate the change in sensor values
-    float deltaVertical = verticalRaw - prevVertical;
-    float deltaHorizontal = horizontalRaw - prevHorizontal;
-    float deltaImu = imuRaw - prevImu;
+  float heading = pose.theta;
 
-    // update the previous sensor values
-    prevVertical = verticalRaw;
-    prevHorizontal = horizontalRaw;
-    prevImu = imuRaw;
+  /* Calculate the heading using the horizontal tracking wheels */
+  heading -= deltaHorizontal / horizontalOffset;
 
-    float heading = pose.theta;
+  /* Use the vertical tracking wheels */
+  heading -= deltaVertical / verticalOffset;
 
-    /* calculate the heading using the horizontal tracking wheels*/
-    heading -=  deltaHorizontal / horizontalOffset;
+  /* Use the IMU */
+  heading += deltaImu;
 
-    /*use the vertical tracking wheels*/
-    heading -= deltaVertical / verticalOffset;
+  float deltaHeading = heading - pose.theta;
+  float avgHeading = pose.theta + deltaHeading / 2;
 
-    /*use the IMU*/
-    heading += deltaImu;
+  // Calculate change in x and y
+  float deltaX = deltaHorizontal;
+  float deltaY = deltaVertical;
 
-    float deltaHeading = heading - pose.theta;
-    float avgHeading = pose.theta + deltaHeading / 2;
+  // Calculate local x and y
+  float localX, localY;
+  if (fabs(deltaHeading) < 1e-6) { // Prevent division by zero
+    localX = deltaX;
+    localY = deltaY;
+  } else {
+    localX = 2 * sin(deltaHeading / 2) * (deltaX / deltaHeading + horizontalOffset);
+    localY = 2 * sin(deltaHeading / 2) * (deltaY / deltaHeading + verticalOffset);
+  }
 
-    // calculate change in x and y
-    float deltaX = 0;
-    float deltaY = 0;
-    deltaY = verticalRaw - prevVertical;
-    deltaX = horizontalRaw - prevHorizontal;
+  // Save previous pose
+  Pose prevPose = pose;
 
-    // calculate local x and y
-    float localX = 0;
-    float localY = 0;
-    if (deltaHeading == 0) { /* prevent divide by 0*/
-        localX = deltaX;
-        localY = deltaY;
-    } else {
-        localX = 2 * sin(deltaHeading / 2) * (deltaX / deltaHeading + horizontalOffset);
-        localY = 2 * sin(deltaHeading / 2) * (deltaY / deltaHeading + verticalOffset);
-    }
-
-    // save previous pose
-    Pose prevPose = pose;
-
-    // calculate global x and y
-    pose.x += localY * sin(avgHeading);
-    pose.y += localY * cos(avgHeading);
-    pose.x += localX * -cos(avgHeading);
-    //pose += localX * sin(avgHeading); //look at what this does exactly and implementing
-    pose.theta = heading;
+  // Calculate global x and y
+  pose.x += localX * cos(avgHeading) - localY * sin(avgHeading);
+  pose.y += localX * sin(avgHeading) + localY * cos(avgHeading);
+  pose.theta = heading;
 }
 
 double Drive::move_to(Direction dir, Coord targetPoint, double timeOut, double maxVelocity){

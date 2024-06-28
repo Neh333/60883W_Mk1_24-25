@@ -64,3 +64,9 @@ double velocityToVoltage(double velocity) {
 double radToDeg(double radian){return (radian * (180 / M_PI));}
 
 double degToRad(double degree){return (degree * (M_PI / 180));}
+
+float wrapAngle(float angle) {
+    while (angle > M_PI) angle -= 2 * M_PI;
+    while (angle < -M_PI) angle += 2 * M_PI;
+    return angle;
+}

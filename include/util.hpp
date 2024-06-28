@@ -19,3 +19,5 @@ double imuTarget(double target);
 double radToDeg(double rad);
 
 double degToRad(double deg);
+
+float wrapAngle(float angle);

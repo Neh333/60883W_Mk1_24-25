@@ -10,22 +10,29 @@ class Odometry{
  double wheelDiameter, verticalOffset, horizontalOffset;
  
  std::unique_ptr<pros::Task> OdomTask = nullptr;
- float lastAngle = 0;
+
+ /*Update vars*/
+ float deltaX = 0;
+ float deltaY = 0;
+
+ /*Prev vars*/
+ float prevVertical = 0;
+ float prevHorizontal = 0;
+ float prevImu = 0;
 
  float calcDeltaTheta(std::vector<std::shared_ptr<pros::IMU>> &imu, bool update = true);
  float calcDeltaTheta(pros::Rotation &tracker1, pros::Rotation &tracker2);
 
  public:
- Odometry(pros::Rotation &vertical, double verticalOffset, pros::Rotation &horizontal, double horizontalOffset,
-            double wheelDiameter, pros::Imu &imu){
-  this->vertical   = &vertical;
-  this->horizontal = &horizontal;
-  this->imu        = &imu;
-  this->verticalOffset = verticalOffset;
-  this->horizontalOffset = horizontalOffset;
-  this->wheelDiameter  = wheelDiameter;
-
- }
+ Odometry(pros::Rotation &vertical, double verticalOffset, pros::Rotation &horizontal, 
+        double horizontalOffset,double wheelDiameter, pros::Imu &imu){
+        this->vertical   = &vertical;
+        this->horizontal = &horizontal;
+        this->imu        = &imu;
+        this->verticalOffset = verticalOffset;
+        this->horizontalOffset = horizontalOffset;
+        this->wheelDiameter  = wheelDiameter;
+    }
  
  pros::Rotation* vertical;
  pros::Rotation* horizontal;

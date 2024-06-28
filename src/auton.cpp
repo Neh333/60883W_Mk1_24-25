@@ -16,11 +16,11 @@ autonTextTuple autos[AUTO_COUNT] = {
 };
 
 //Drive drive(leftMotors, rightMotors, imu); // none odom to tune and relative movements
-Odometry odom(verticalTracker, 0 , horizontalTracker, 0, 2, imu);
+Odometry odom(verticalTracker, 4 , horizontalTracker, 6, 2, imu);
 Drive drive(leftMotors, rightMotors, odom);
 
 void winPoint(){
-    /*
+
  drive.odom->init();
  pros::Task runOnError(onError_fn);
 
@@ -28,7 +28,7 @@ void winPoint(){
 
  runOnError.remove();
  drive.onErrorVector.clear();
- */
+ 
  
 }
 
