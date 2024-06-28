@@ -32,5 +32,5 @@ extern pros::Motor intake;
 extern pros::Imu imu;
 extern pros::Rotation horizontalTracker;
 extern pros::Rotation verticalTracker;
-extern pros::Rotation hangRot;
+extern pros::Rotation liftRot;
 

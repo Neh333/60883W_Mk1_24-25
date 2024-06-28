@@ -1,6 +1,4 @@
 #include "include.hpp"
-
-#include "include.hpp"
 #include "pros/adi.hpp"
 #include "pros/misc.hpp"
 #include "pros/motor_group.hpp"
@@ -40,4 +38,3 @@ pros::adi::DigitalOut backClamp('G');
 //toggle vars
 bool hangRachet = true;
 bool fn_Lock= true;
- 

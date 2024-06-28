@@ -22,11 +22,11 @@ const int Odometry::getHoriPos(){
 }
 
 const int Odometry::getX(){
-  return this->pose.x;
+  return (this->pose.x);
 }
 
 const int Odometry::getY(){
-  return this->pose.y;
+  return (this->pose.y);
 }
 
 const Pose Odometry::getCurrentPose(){

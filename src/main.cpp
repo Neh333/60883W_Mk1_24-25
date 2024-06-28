@@ -1,7 +1,7 @@
 #include "auton.hpp"
 #include "drive.hpp"
 #include "include.hpp"
-#include "lvgl_funcs.hpp"`
+//#include "lvgl_funcs.hpp"`
 
 #define AUTO_NUMBER 8
 uint8_t auton = AUTO_NUMBER; 
@@ -22,7 +22,6 @@ uint8_t auton = AUTO_NUMBER;
 void initialize(){
 	//initBarGraph();
 	//pros::Task brainDisplayTask(updateBarGraph_fn);
-  controller.clear(); //fpr test
 	drive.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
   lift.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
   
@@ -78,9 +77,7 @@ void arcade_standard(double curve) {
 }
 
 void opcontrol() {
-  
  drive.odom->init();
-  
  while (true) {
      /*Display current autonomous on the controller*/
      AUTO_SWITCH()
@@ -127,10 +124,14 @@ void opcontrol() {
      else {lift.move_voltage(0);}
 
      //Debugging 
-     controller.print(5, 0, "vert val: %.2f     ", drive.odom->getVertPos());
-     controller.print(6, 0, "hori val: %.2f     ", drive.odom->getHoriPos());
-     controller.print(7, 0, "X:        %.2f     ", drive.odom->getX());
-     controller.print(8, 0, "Y:        %.2f     ", drive.odom->getY());
+     pros::screen::print(TEXT_LARGE,0, "Vert Val: %3d", drive.odom->getVertPos());
+     pros::screen::print(TEXT_LARGE,2, "Hori Val: %3d", drive.odom->getHoriPos());
+     pros::screen::print(TEXT_LARGE,4, "X Val: %3d", drive.odom->getX());
+     pros::screen::print(TEXT_LARGE,6, "Y Val: %3d", drive.odom->getY());
+
+     //controller.print(2, 2, "hori val: %2f     ", drive.odom->getHoriPos());
+     //controller.print(2, 3, "X:        %2f     ", drive.odom->getX());
+     //controller.print(2, 4, "Y:        %2f     ", drive.odom->getY());
      
      pros::delay(20);
     }

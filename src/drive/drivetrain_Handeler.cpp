@@ -28,7 +28,7 @@ Drive::Drive(pros::MotorGroup &leftMotors, pros::MotorGroup &rightMotors, Odomet
  this->leftMotors      = &leftMotors;
  this->rightMotors     = &rightMotors;
  this->imu             = odometry.imu;
- this->odom = &odometry;
+ this->odom            = &odometry;
 }
 
 /*********************************************************************************************************/
