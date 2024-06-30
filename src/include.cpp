@@ -33,8 +33,8 @@ pros::Rotation horizontalTracker(6);
 pros::Rotation liftRot(10);
 
 //ADI Digital Out Devices 
-pros::adi::DigitalOut backClamp('G');
+pros::adi::DigitalOut mogoMechPisses('A');
 
-//toggle vars
-bool hangRachet = true;
-bool fn_Lock= true;
+//Tog vars
+bool backClampTog = true;
+

@@ -2,6 +2,7 @@
 #include "parametrics.hpp"
 #include "include.hpp"
 #include "pros/rtos.hpp"
+#include <cmath>
 #include <memory>
 
 double Odometry::degreeToInch(double deg) {
@@ -34,17 +35,20 @@ const Pose Odometry::getCurrentPose(){
 }
 
 void Odometry::init(){
- if (OdomTask == nullptr) 
- {
-    OdomTask = std::make_unique<pros::Task> ([this]() {
-      while (true) 
-      {
-        this->update();
-        pros::delay(20);
-      }
-    });
-  }
+ pros::Task OdomTask = pros::Task ([this]() {
+    //odomMutex.give();
+    while (true) 
+    {
+      odomMutex.take();
+      //this->update();
+      this->pose.x = 100;
+      pros::delay(20);
+      odomMutex.give();
+    }
+ });
+  //odomMutex.take();
 }
+
 
 void Odometry::calibrate(bool calibrateIMU){
  if (!calibrateIMU) {
@@ -62,31 +66,17 @@ void Odometry::update(){
   /* Get the current sensor values */
   float verticalRaw = degreeToInch(getVertPos());
   float horizontalRaw = degreeToInch(getHoriPos());
-  float imuRaw = degToRad(imu->get_rotation());
+  pose.theta = degToRad(imu->get_rotation());
 
   // Calculate the change in sensor values
   float deltaVertical = verticalRaw - prevVertical;
   float deltaHorizontal = horizontalRaw - prevHorizontal;
-  float deltaImu = wrapAngle(imuRaw - prevImu);
+  float deltaImu = wrapAngle(pose.theta - prevTheta);
 
   // Update the previous sensor values
   prevVertical = verticalRaw;
   prevHorizontal = horizontalRaw;
-  prevImu = imuRaw;
-
-  float heading = pose.theta;
-
-  /* Calculate the heading using the horizontal tracking wheels */
-  heading -= deltaHorizontal / horizontalOffset;
-
-  /* Use the vertical tracking wheels */
-  heading -= deltaVertical / verticalOffset;
-
-  /* Use the IMU */
-  heading += deltaImu;
-
-  float deltaHeading = heading - pose.theta;
-  float avgHeading = pose.theta + deltaHeading / 2;
+  prevTheta = pose.theta;
 
   // Calculate change in x and y
   float deltaX = deltaHorizontal;
@@ -94,21 +84,18 @@ void Odometry::update(){
 
   // Calculate local x and y
   float localX, localY;
-  if (fabs(deltaHeading) < 1e-6) { // Prevent division by zero
+  if (fabs(pose.theta) < 0) { // Prevent division by zero
     localX = deltaX;
     localY = deltaY;
   } else {
-    localX = 2 * sin(deltaHeading / 2) * (deltaX / deltaHeading + horizontalOffset);
-    localY = 2 * sin(deltaHeading / 2) * (deltaY / deltaHeading + verticalOffset);
+    // Calculate global x and y
+    pose.x += cos(imu->get_heading()) * degreeToInch(deltaVertical);
+    pose.y += sin(imu->get_heading()) * (degreeToInch(deltaVertical) + deltaHorizontal);
   }
 
   // Save previous pose
   Pose prevPose = pose;
-
-  // Calculate global x and y
-  pose.x += localX * cos(avgHeading) - localY * sin(avgHeading);
-  pose.y += localX * sin(avgHeading) + localY * cos(avgHeading);
-  pose.theta = heading;
+  pose.theta = imu->get_heading();
 }
 
 double Drive::move_to(Direction dir, Coord targetPoint, double timeOut, double maxVelocity){

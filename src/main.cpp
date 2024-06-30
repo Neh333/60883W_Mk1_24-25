@@ -77,7 +77,7 @@ void arcade_standard(double curve) {
 }
 
 void opcontrol() {
- drive.odom->init();
+ //drive.odom->init();
  while (true) {
    /*Display current autonomous on the controller*/
    AUTO_SWITCH()
@@ -123,6 +123,14 @@ void opcontrol() {
    }
    else {lift.move_voltage(0);}
 
+   if(controller.get_digital_new_press(DIGITAL_A)){ backClampTog = !backClampTog;}
+   if (!backClampTog) {
+      mogoMechPisses.set_value(true);
+    }else {
+      mogoMechPisses.set_value(false);
+    }
+   
+
    //Debugging 
    pros::screen::print(TEXT_LARGE,0, "Vert Val: %3d", drive.odom->getVertPos());
    pros::screen::print(TEXT_LARGE,2, "Hori Val: %3d", drive.odom->getHoriPos());
@@ -130,5 +138,5 @@ void opcontrol() {
    pros::screen::print(TEXT_LARGE,6, "Y Val: %3d", drive.odom->getY());
      
    pros::delay(20);
-  }
+ }
 }

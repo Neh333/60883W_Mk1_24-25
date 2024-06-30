@@ -34,3 +34,7 @@ extern pros::Rotation horizontalTracker;
 extern pros::Rotation verticalTracker;
 extern pros::Rotation liftRot;
 
+/*ADI Digital out*/
+extern pros::adi::DigitalOut mogoMechPisses;
+
+extern bool backClampTog;
