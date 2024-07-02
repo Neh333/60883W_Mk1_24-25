@@ -1,6 +1,7 @@
 #include "drive.hpp"
 #include "parametrics.hpp"
 #include "include.hpp"
+#include "pros/llemu.hpp"
 #include "pros/rtos.hpp"
 #include "pros/screen.h"
 #include "util.hpp"
@@ -17,7 +18,7 @@ double inchToDegree(double inch) {
 }
 
 void updateOdom_fn(void *param){
- std::cout << "entered task";
+ std::cout << "entered OdomTask";
 
  odomPose = Pose(0,0,0);
 
@@ -31,8 +32,7 @@ void updateOdom_fn(void *param){
 
  std::uint32_t startTime = pros::millis();
  while (true) {
-    std::cout << "entered task while loop";
-    mutex.take();
+    std::cout << "entered OdomTask while loop";
 
     double test = 0;
 
@@ -60,18 +60,16 @@ void updateOdom_fn(void *param){
       odomPose.y += /*sin(odomPose.theta) */ (degreeToInch(deltaVertical) + deltaHorizontal);
     }
 
-    pros::screen::print(TEXT_MEDIUM, 0, "Vert Val: %.3f", verticalTracker.get_position()/100);
-    pros::screen::print(TEXT_MEDIUM,2, "Hori Val: %.3f", horizontalTracker.get_position()/100);
-    pros::screen::print(TEXT_MEDIUM, 4, "X Val: %.3f", odomPose.y);
-    pros::screen::print(TEXT_MEDIUM, 6, "Y Val: %.3f", odomPose.x);
-    pros::screen::print(TEXT_MEDIUM, 8, "Test Val: %.3f", test);
+    pros::lcd::print(0, "Vert Val: %.3f", verticalTracker.get_position()/100);
+    pros::lcd::print(2, "Hori Val: %.3f", horizontalTracker.get_position()/100);
+    pros::lcd::print(4, "X Val: %.3f", odomPose.y);
+    pros::lcd::print(6, "Y Val: %.3f", odomPose.x);
+    pros::lcd::print(8, "Test Val: %.3f", test);
 
     // Save previous pose
     Pose prevPose = odomPose;
 
     test++;
-
-    mutex.give();
     pros::delay(20);
     //pros::Task::delay_until(&startTime, 20);
  }
