@@ -18,155 +18,77 @@ double inchToDegree(double inch) {
 }
 
 void updateOdom_fn(void *param){
- std::cout << "entered OdomTask";
 
- odomPose = Pose(0,0,0);
+ horizontalTracker.reset_position();
+ verticalTracker.reset_position();
 
- verticalTracker.reset();
- horizontalTracker.reset();
- pros::Mutex mutex;
+ double prevVertical = 0;
+ double prevHorizontal = 0;
+ double prevImu = 0;
+ double prevTheta = 0;
 
- float prevVertical = 0;
- float prevHorizontal = 0;
- float prevTheta = 0;
-
- std::uint32_t startTime = pros::millis();
  while (true) {
-    std::cout << "entered OdomTask while loop";
-
-    double test = 0;
-
-    /* Get the current sensor values */
-    float verticalRaw = (double)verticalTracker.get_position()/100;
-    float horizontalRaw = (double)horizontalTracker.get_position()/100;
-    odomPose.theta = degToRad(imu.get_rotation());
+ /* Get the current sensor values */
+    float verticalRaw = degreeToInch(verticalTracker.get_position()/100);
+    float horizontalRaw = degreeToInch(horizontalTracker.get_position()/100);
+    float imuRaw = degToRad(imu.get_rotation());
 
     // Calculate the change in sensor values
     float deltaVertical = verticalRaw - prevVertical;
     float deltaHorizontal = horizontalRaw - prevHorizontal;
-    float deltaImu = wrapAngle(odomPose.theta - prevTheta);
+    float deltaImu = imuRaw - prevImu;
 
     // Update the previous sensor values
     prevVertical = verticalRaw;
     prevHorizontal = horizontalRaw;
-    prevTheta = odomPose.theta;
+    prevImu = imuRaw;
 
-    if (fabs(odomPose.theta) < 0) { // Prevent division by zero
-      odomPose.x = deltaHorizontal;
-      odomPose.y = deltaVertical;
-    } else {
-      // Calculate global x and y
-      odomPose.x += /*cos(odomPose.theta) */ degreeToInch(deltaVertical);
-      odomPose.y += /*sin(odomPose.theta) */ (degreeToInch(deltaVertical) + deltaHorizontal);
+    float heading = odomPose.theta;
+
+    /* Calculate the heading using the horizontal tracking wheels */
+    //heading -= deltaHorizontal / horizontalOffset;
+
+    /* Use the vertical tracking wheels */
+    //heading -= deltaVertical / verticalOffset;
+
+    /* Use the IMU */
+    //heading += deltaImu;
+
+    float deltaHeading = heading - odomPose.theta;
+    float avgHeading = odomPose.theta + deltaHeading / 2;
+
+    // Calculate change in x and y
+    float deltaX = deltaHorizontal;
+    float deltaY = deltaVertical;
+
+    // Calculate local x and y
+    float localX, localY;
+
+    if (fabs(deltaHeading) < 0) { // Prevent division by zero
+        localX = deltaX;
+        localY = deltaY;
+    } 
+    
+    else {
+        localX = 2 * sin(deltaHeading / 2) * (deltaX / deltaHeading /*+ horizontalOffset*/);
+        localY = 2 * sin(deltaHeading / 2) * (deltaY / deltaHeading /*+ verticalOffset*/);
     }
+
+    // Calculate global x and y
+    odomPose.x += localX * cos(avgHeading) - localY * sin(avgHeading);
+    odomPose.y += localX * sin(avgHeading) + localY * cos(avgHeading);
+
+    odomPose.theta = heading;
 
     pros::lcd::print(0, "Vert Val: %.3f", verticalTracker.get_position()/100);
     pros::lcd::print(2, "Hori Val: %.3f", horizontalTracker.get_position()/100);
-    pros::lcd::print(4, "X Val: %.3f", odomPose.y);
-    pros::lcd::print(6, "Y Val: %.3f", odomPose.x);
-    pros::lcd::print(8, "Test Val: %.3f", test);
+    pros::lcd::print(4, "X Val: %.3f", odomPose.x);
+    pros::lcd::print(6, "Y Val: %.3f", odomPose.y);
 
-    // Save previous pose
-    Pose prevPose = odomPose;
-
-    test++;
     pros::delay(20);
-    //pros::Task::delay_until(&startTime, 20);
  }
 }
-
-/*
-double Odometry::degreeToInch(double deg) {
-  return (deg * ((wheelDiameter*M_PI)/360) );
-}
-
-double Odometry::inchToDegree(double inch) {
-  return (inch / ((wheelDiameter*M_PI)/360) );
-}
-
-//rot getters
-const int Odometry::getVertPos(){
-  return (this->vertical->get_position()/100);
-}
-
-const int Odometry::getHoriPos(){
-  return (this->horizontal->get_position()/100);
-}
-
-const int Odometry::getX(){
-  return (this->pose.x);
-}
-
-const int Odometry::getY(){
-  return (this->pose.y);
-}
-
-const Pose Odometry::getCurrentPose(){
-  return (this->pose);
-}
-
-void Odometry::init(){
- pros::Task OdomTask = pros::Task ([=]() { 
-    while (true) 
-    {
-      pros::delay(20);
-      pros::screen::print(TEXT_LARGE, 4, "X Val: %3d", getX());
-      pros::screen::print(TEXT_LARGE, 6, "Y Val: %3d", getY());
-
-      update();
-    }
- });
-}
-
-void Odometry::calibrate(bool calibrateIMU){
- if (!calibrateIMU) {
-   vertical->reset();
-   horizontal->reset();
- }
- else {
-  imu->reset();
-  vertical->reset();
-  horizontal->reset();
- }
-}
-
-
-void Odometry::update(){
-  //Get the current sensor values 
-  float verticalRaw = degreeToInch(getVertPos());
-  float horizontalRaw = degreeToInch(getHoriPos());
-  pose.theta = degToRad(imu->get_rotation());
-
-  // Calculate the change in sensor values
-  float deltaVertical = verticalRaw - prevVertical;
-  float deltaHorizontal = horizontalRaw - prevHorizontal;
-  float deltaImu = wrapAngle(pose.theta - prevTheta);
-
-  // Update the previous sensor values
-  prevVertical = verticalRaw;
-  prevHorizontal = horizontalRaw;
-  prevTheta = pose.theta;
-
-  // Calculate change in x and y
-  float deltaX = deltaHorizontal;
-  float deltaY = deltaVertical;
-
-  // Calculate local x and y
-  float localX, localY;
-  if (fabs(pose.theta) < 0) { // Prevent division by zero
-    localX = deltaX;
-    localY = deltaY;
-  } else {
-    // Calculate global x and y
-    pose.x += cos(pose.theta) * degreeToInch(deltaVertical);
-    pose.y += sin(pose.theta) * (degreeToInch(deltaVertical) + deltaHorizontal);
-  }
-
-  // Save previous pose
-  Pose prevPose = pose;
-  pose.theta = imu->get_heading();
-}
-*/
+ 
 
 double Drive::move_to(Direction dir, Coord targetPoint, double timeOut, double maxVelocity){
  /* Error values */

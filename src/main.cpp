@@ -8,7 +8,7 @@ uint8_t auton = AUTO_NUMBER;
 
 #define AUTO_SWITCH(){ \
 	switch(auton%AUTO_NUMBER){\
-    case 0:  controller.print(2, 0, "Win Point   %.2f               ",imu.get_heading()); break;\
+    case 0:  controller.print(2, 0, "Win Point   %.2f               ",drive.imu->get_heading()); break;\
 		case 1:  controller.print(2, 0, "Left Side   %.2f               ",imu.get_heading()); break;\
 		case 2:  controller.print(2, 0, "Right Side  %.2f               ",imu.get_heading()); break;\
 		case 3:  controller.print(2, 0, "Left Elims  %.2f               ",imu.get_heading()); break;\
@@ -79,7 +79,6 @@ void arcade_standard(double curve) {
 
 void opcontrol() {
  pros::Task updateOdom(updateOdom_fn);
-
  while (true) {
    /*Display current autonomous on the controller*/
    AUTO_SWITCH()

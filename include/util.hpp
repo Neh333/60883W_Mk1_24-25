@@ -20,4 +20,4 @@ double radToDeg(double rad);
 
 double degToRad(double deg);
 
-float wrapAngle(float angle);
+float wrapAngle(float rad);
