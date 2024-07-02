@@ -1,23 +1,28 @@
 #include "main.h"
 #include "pros/rotation.hpp"
 #include "parametrics.hpp"
+#include "pros/rtos.hpp"
 #include <cstddef>
 #include <memory>
 
-class Odometry{
+extern Pose odomPose;
+double degreeToInch(double deg);
+double inchToDegree(double inch);
+void updateOdom_fn(void* param);
+
+/*class Odometry{
  private:
  Pose pose = Pose(0, 0, 0);
 
  double wheelDiameter, verticalOffset, horizontalOffset;
  
- //pros::Task OdomTask = NULL;
- pros::Mutex odomMutex;
+ //pros::Task* OdomTask = nullptr;
 
- /*Update vars*/
+ //Update vars
  float deltaX = 0;
  float deltaY = 0;
 
- /*Prev vars*/
+ //Prev vars
  float prevVertical = 0;
  float prevHorizontal = 0;
  float prevTheta = 0;
@@ -53,4 +58,4 @@ class Odometry{
  void init();
  void calibrate(bool calibrateIMU = true);
  void update();
-};
+};*/

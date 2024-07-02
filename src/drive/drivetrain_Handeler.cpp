@@ -16,12 +16,13 @@ Drive::Drive(pros::MotorGroup &leftMotors, pros::MotorGroup &rightMotors, pros::
  this->imu             = &imu;
 }
 
+/*
 Drive::Drive(pros::MotorGroup &leftMotors, pros::MotorGroup &rightMotors, Odometry& odometry){
  setPID(1);
  setScheduleThreshold_l(NO_SCHEDULING);
  setScheduleThreshold_a(NO_SCHEDULING);
 
- /* slew, slew_lower_thresh, slew_upper_thresh */
+ //slew, slew_lower_thresh, slew_upper_thresh
  setSlew({0, 30, 80});
  setSlew_a({0, 30, 80});
 
@@ -30,6 +31,7 @@ Drive::Drive(pros::MotorGroup &leftMotors, pros::MotorGroup &rightMotors, Odomet
  this->imu             = odometry.imu;
  this->odom            = &odometry;
 }
+*/
 
 /*********************************************************************************************************/
 /*DRIVE METHODS*/

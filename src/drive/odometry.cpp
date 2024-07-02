@@ -2,9 +2,82 @@
 #include "parametrics.hpp"
 #include "include.hpp"
 #include "pros/rtos.hpp"
+#include "util.hpp"
 #include <cmath>
-#include <memory>
 
+Pose odomPose = Pose(0,0,0);
+
+double degreeToInch(double deg) {
+  return (deg * ((2*M_PI)/360) );
+}
+
+double inchToDegree(double inch) {
+  return (inch / ((2*M_PI)/360) );
+}
+
+/*Update vars*/
+float deltaX = 0;
+float deltaY = 0;
+
+/*Prev vars*/
+float prevVertical = 0;
+float prevHorizontal = 0;
+float prevTheta = 0;
+
+void updateOdom_fn(void* param){
+ odomPose = Pose(0,0,0);
+
+ verticalTracker.reset();
+ horizontalTracker.reset();
+ pros::Mutex mutex;
+
+ std::uint32_t startTime = pros::millis();
+ while (true) {
+    mutex.take();
+
+    double test = 0;
+
+    /* Get the current sensor values */
+    float verticalRaw = (double)verticalTracker.get_position()/100;
+    float horizontalRaw = (double)horizontalTracker.get_position()/100;
+    odomPose.theta = degToRad(imu.get_rotation());
+
+    // Calculate the change in sensor values
+    float deltaVertical = verticalRaw - prevVertical;
+    float deltaHorizontal = horizontalRaw - prevHorizontal;
+    float deltaImu = wrapAngle(odomPose.theta - prevTheta);
+
+    // Update the previous sensor values
+    prevVertical = verticalRaw;
+    prevHorizontal = horizontalRaw;
+    prevTheta = odomPose.theta;
+
+    if (fabs(odomPose.theta) < 0) { // Prevent division by zero
+      odomPose.x = deltaHorizontal;
+      odomPose.y = deltaVertical;
+    } else {
+      // Calculate global x and y
+      odomPose.x += /*cos(odomPose.theta) */ degreeToInch(deltaVertical);
+      odomPose.y += /*sin(odomPose.theta) */ (degreeToInch(deltaVertical) + deltaHorizontal);
+    }
+
+    pros::screen::print(TEXT_LARGE,0, "Vert Val: %3d", verticalTracker.get_position()/100);
+    pros::screen::print(TEXT_LARGE,2, "Hori Val: %3d", horizontalTracker.get_position()/100);
+    pros::screen::print(TEXT_LARGE, 4, "X Val: %3d", odomPose.y);
+    pros::screen::print(TEXT_LARGE, 6, "Y Val: %3d", odomPose.x);
+    pros::screen::print(TEXT_LARGE, 8, "Test Val: %3d", test);
+
+    // Save previous pose
+    Pose prevPose = odomPose;
+
+    test++;
+
+    mutex.give();
+    pros::Task::delay_until(&startTime, 20);
+ }
+}
+
+/*
 double Odometry::degreeToInch(double deg) {
   return (deg * ((wheelDiameter*M_PI)/360) );
 }
@@ -13,7 +86,7 @@ double Odometry::inchToDegree(double inch) {
   return (inch / ((wheelDiameter*M_PI)/360) );
 }
 
-/*rot getters*/
+//rot getters
 const int Odometry::getVertPos(){
   return (this->vertical->get_position()/100);
 }
@@ -35,20 +108,17 @@ const Pose Odometry::getCurrentPose(){
 }
 
 void Odometry::init(){
- pros::Task OdomTask = pros::Task ([this]() {
-    //odomMutex.give();
+ pros::Task OdomTask = pros::Task ([=]() { 
     while (true) 
     {
-      odomMutex.take();
-      //this->update();
-      this->pose.x = 100;
       pros::delay(20);
-      odomMutex.give();
+      pros::screen::print(TEXT_LARGE, 4, "X Val: %3d", getX());
+      pros::screen::print(TEXT_LARGE, 6, "Y Val: %3d", getY());
+
+      update();
     }
  });
-  //odomMutex.take();
 }
-
 
 void Odometry::calibrate(bool calibrateIMU){
  if (!calibrateIMU) {
@@ -62,8 +132,9 @@ void Odometry::calibrate(bool calibrateIMU){
  }
 }
 
+
 void Odometry::update(){
-  /* Get the current sensor values */
+  //Get the current sensor values 
   float verticalRaw = degreeToInch(getVertPos());
   float horizontalRaw = degreeToInch(getHoriPos());
   pose.theta = degToRad(imu->get_rotation());
@@ -89,14 +160,15 @@ void Odometry::update(){
     localY = deltaY;
   } else {
     // Calculate global x and y
-    pose.x += cos(imu->get_heading()) * degreeToInch(deltaVertical);
-    pose.y += sin(imu->get_heading()) * (degreeToInch(deltaVertical) + deltaHorizontal);
+    pose.x += cos(pose.theta) * degreeToInch(deltaVertical);
+    pose.y += sin(pose.theta) * (degreeToInch(deltaVertical) + deltaHorizontal);
   }
 
   // Save previous pose
   Pose prevPose = pose;
   pose.theta = imu->get_heading();
 }
+*/
 
 double Drive::move_to(Direction dir, Coord targetPoint, double timeOut, double maxVelocity){
  /* Error values */
@@ -104,8 +176,8 @@ double Drive::move_to(Direction dir, Coord targetPoint, double timeOut, double m
  double errorDrift;
  double proportionDrift;
  const double initialHeading = imu->get_heading(); //inital theta
- const double initialVertical = odom->getVertPos();
- const double tickTarget = odom->inchToDegree((odom->getCurrentPose().distance(Pose(targetPoint))));
+ const double initialVertical = verticalTracker.get_position();
+ const double tickTarget = inchToDegree((odomPose.distance(Pose(targetPoint))));
  /* Scheduling variables */
  bool scheduled = (scheduleThreshold_l == NO_SCHEDULING);
  double myKP = this->kP, myKI = this->kI, myKD = this->kD;
@@ -135,7 +207,7 @@ double Drive::move_to(Direction dir, Coord targetPoint, double timeOut, double m
      }
 
      /* Update error, do actual PID calculations, adjust for slew, and clamp the resulting value */
-     error = tickTarget - fabs(odom->getVertPos() - initialVertical);
+     error = tickTarget - fabs(verticalTracker.get_position() - initialVertical);
      finalVolt = updatePID(myKP, myKI, myKD, error, lastError, integral, integralActive);
      calculateSlew(&finalVolt, actualVelocityAll(), &slewProf);
      finalVolt = std::clamp(finalVolt, -maxVolt, maxVolt);
@@ -169,7 +241,7 @@ double Drive::move_to(Direction dir, Coord targetPoint, double timeOut, double m
 
 double Drive::turn_to(Direction dir, Coord targetPoint, double timeOut, double maxVelocity){
   double lastError;
-  double target = targetPoint.angle(odom->getCurrentPose());
+  double target = targetPoint.angle(odomPose);
   const double initialAngle = imu->get_rotation() + 360;
   /* Scheduling variables */
   bool scheduled = (scheduleThreshold_a == NO_SCHEDULING);
@@ -242,9 +314,9 @@ double Drive::hardStop_at(Direction dir, Coord cutOffPoint, Coord targetPoint, d
  double proportionDrift;
  double lastError;
  const double initialHeading = imu->get_heading();
- const double initalVertical = odom->getVertPos();
- const double tickTarget = odom->inchToDegree(odom->getCurrentPose().distance(Pose(targetPoint)));
- const double tickTargetCutOff = odom->inchToDegree(odom->getCurrentPose().distance(Pose(cutOffPoint)));
+ const double initalVertical = verticalTracker.get_position();
+ const double tickTarget = inchToDegree(odomPose.distance(Pose(targetPoint)));
+ const double tickTargetCutOff = inchToDegree(odomPose.distance(Pose(cutOffPoint)));
  /* Scheduling variables */
  bool scheduled = (scheduleThreshold_l == NO_SCHEDULING);
  double myKP = this->kP, myKI = this->kI, myKD = this->kD;
@@ -259,7 +331,7 @@ double Drive::hardStop_at(Direction dir, Coord cutOffPoint, Coord targetPoint, d
  isNewPID = true;
 
  //Begin PID
- while(tickTargetCutOff > fabs(odom->getVertPos() - initalVertical)){
+ while(tickTargetCutOff > fabs(verticalTracker.get_position()) - initalVertical){
 
       if(!scheduled && fabs(error) < scheduleThreshold_l){
       myKP = scheduledConstants.kP;
@@ -268,7 +340,7 @@ double Drive::hardStop_at(Direction dir, Coord cutOffPoint, Coord targetPoint, d
       scheduled = true;
      }
 
-     error = tickTarget - fabs(odom->getVertPos() - initalVertical);
+     error = tickTarget - fabs(verticalTracker.get_position() - initalVertical);
     
      //update the PD values
      double zero = 0;
@@ -303,9 +375,9 @@ double Drive::swerve_To(Direction dir, Pose targetPose, double timeOut, double m
  double error_a;
  double lastError;
  double lastError_a;
- double target_a = targetPose.angle(odom->getCurrentPose());
+ double target_a = targetPose.angle(odomPose);
  
- const Pose initalPose = odom->getCurrentPose();
+ const Pose initalPose = odomPose;
 
  /* Scheduling variables */
  bool scheduled = swerveThresholds.first == NO_SCHEDULING;
@@ -363,7 +435,7 @@ double Drive::swerve_To(Direction dir, Pose targetPose, double timeOut, double m
     }
     
     /*check to make sure if d needs to use init or current and adjust acordingly*/
-    const double d =  odom->getCurrentPose().distance(targetPose);
+    const double d =  odomPose.distance(targetPose);
 
     /* calculate the carrot point 
     *
@@ -372,7 +444,7 @@ double Drive::swerve_To(Direction dir, Pose targetPose, double timeOut, double m
     Coord carrot(targetPose.x - d * cos(targetPose.theta) * dlead,
 			           targetPose.y - d * sin(targetPose.theta) * dlead);
 
-    error = odom->getCurrentPose().distance(carrot);
+    error = odomPose.distance(carrot);
 
 
     

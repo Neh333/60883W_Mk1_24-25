@@ -138,14 +138,14 @@ class Drive{
  public:
  /*Drive object constructors*/ 
  Drive(pros::MotorGroup &leftMotors, pros::MotorGroup &rightMotors, pros::Imu &imu);
- Drive(pros::MotorGroup &leftMotors, pros::MotorGroup &rightMotors, Odometry& odometry);
+ //Drive(pros::MotorGroup &leftMotors, pros::MotorGroup &rightMotors, Odometry& odometry);
 
  /*"Virtual" Drivetrain attributes and methods*/ 
  pros::MotorGroup *rightMotors;
  pros::MotorGroup *leftMotors;
  pros::Imu        *imu;
  
- class Odometry* odom;
+ //class Odometry* odom;
 
  void setBrakeMode(pros::motor_brake_mode_e brakeMode);
 

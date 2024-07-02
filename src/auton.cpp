@@ -15,13 +15,13 @@ autonTextTuple autos[AUTO_COUNT] = {
     {tune,     "Tune"       }
 };
 
-//Drive drive(leftMotors, rightMotors, imu); // none odom to tune and relative movements
-Odometry odom(verticalTracker, 4 , horizontalTracker, 6, 2, imu);
-Drive drive(leftMotors, rightMotors, odom);
+Drive drive(leftMotors, rightMotors, imu); // none odom to tune and relative movements
+//Odometry odom(verticalTracker, 4 , horizontalTracker, 6, 2, imu);
+//Drive drive(leftMotors, rightMotors, odom);
 
 void winPoint(){
 
- drive.odom->init();
+ //drive.odom->init();
  pros::Task runOnError(onError_fn);
 
  drive.move(backward, 24, 2, 100);
@@ -33,7 +33,7 @@ void winPoint(){
 }
 
 void leftSide(){
- drive.odom->init();
+ //drive.odom->init();
  pros::Task runOnError(onError_fn);
 
  runOnError.remove();
@@ -41,7 +41,7 @@ void leftSide(){
 }
 
 void rightSide(){
- drive.odom->init();
+ //drive.odom->init();
  pros::Task runOnError(onError_fn);
 
  runOnError.remove();
@@ -49,7 +49,7 @@ void rightSide(){
 }
 
 void leftElim(){
- drive.odom->init();
+ //drive.odom->init();
  pros::Task runOnError(onError_fn);
 
  runOnError.remove();
@@ -57,7 +57,7 @@ void leftElim(){
 }
 
 void rightElim(){
- drive.odom->init();
+ //drive.odom->init();
  pros::Task runOnError(onError_fn);
 
  runOnError.remove();
@@ -65,7 +65,7 @@ void rightElim(){
 }
 
 void skills(){
- drive.odom->init();
+ //drive.odom->init();
  pros::Task runOnError(onError_fn);
 
  runOnError.remove();
@@ -75,7 +75,7 @@ void skills(){
 void nothing(){}
 
 void tune(){
- drive.odom->init();
+ //drive.odom->init();
  pros::Task runOnError(onError_fn);
 
  runOnError.remove();

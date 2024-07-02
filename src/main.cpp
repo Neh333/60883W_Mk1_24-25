@@ -77,7 +77,8 @@ void arcade_standard(double curve) {
 }
 
 void opcontrol() {
- //drive.odom->init();
+ pros::Task updateOdom(updateOdom_fn);
+
  while (true) {
    /*Display current autonomous on the controller*/
    AUTO_SWITCH()
@@ -91,7 +92,7 @@ void opcontrol() {
       
    /*Reset all sensors*/
    if(controller.get_digital_new_press(DIGITAL_UP)){
-     drive.odom->calibrate();
+     //drive.odom->calibrate();
      while(drive.imu->is_calibrating()){
        controller.print(2,0,"Calibrating");
        pros::delay(20);
@@ -99,7 +100,7 @@ void opcontrol() {
    } 
      
    /*Calibrate Odom*/
-   else if (controller.get_digital_new_press(DIGITAL_B)){drive.odom->calibrate(false);}
+  // else if (controller.get_digital_new_press(DIGITAL_B)){drive.odom->calibrate(false);}
 
    /*DRIVER CONTROL */
    arcade_standard(5);
@@ -129,14 +130,6 @@ void opcontrol() {
     }else {
       mogoMechPisses.set_value(false);
     }
-   
-
-   //Debugging 
-   pros::screen::print(TEXT_LARGE,0, "Vert Val: %3d", drive.odom->getVertPos());
-   pros::screen::print(TEXT_LARGE,2, "Hori Val: %3d", drive.odom->getHoriPos());
-   pros::screen::print(TEXT_LARGE,4, "X Val: %3d", drive.odom->getX());
-   pros::screen::print(TEXT_LARGE,6, "Y Val: %3d", drive.odom->getY());
-     
    pros::delay(20);
  }
 }
