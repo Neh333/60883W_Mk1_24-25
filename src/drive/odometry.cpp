@@ -2,6 +2,7 @@
 #include "parametrics.hpp"
 #include "include.hpp"
 #include "pros/rtos.hpp"
+#include "pros/screen.h"
 #include "util.hpp"
 #include <cmath>
 
@@ -15,24 +16,22 @@ double inchToDegree(double inch) {
   return (inch / ((2*M_PI)/360) );
 }
 
-/*Update vars*/
-float deltaX = 0;
-float deltaY = 0;
+void updateOdom_fn(void *param){
+ std::cout << "entered task";
 
-/*Prev vars*/
-float prevVertical = 0;
-float prevHorizontal = 0;
-float prevTheta = 0;
-
-void updateOdom_fn(void* param){
  odomPose = Pose(0,0,0);
 
  verticalTracker.reset();
  horizontalTracker.reset();
  pros::Mutex mutex;
 
+ float prevVertical = 0;
+ float prevHorizontal = 0;
+ float prevTheta = 0;
+
  std::uint32_t startTime = pros::millis();
  while (true) {
+    std::cout << "entered task while loop";
     mutex.take();
 
     double test = 0;
@@ -61,11 +60,11 @@ void updateOdom_fn(void* param){
       odomPose.y += /*sin(odomPose.theta) */ (degreeToInch(deltaVertical) + deltaHorizontal);
     }
 
-    pros::screen::print(TEXT_LARGE,0, "Vert Val: %3d", verticalTracker.get_position()/100);
-    pros::screen::print(TEXT_LARGE,2, "Hori Val: %3d", horizontalTracker.get_position()/100);
-    pros::screen::print(TEXT_LARGE, 4, "X Val: %3d", odomPose.y);
-    pros::screen::print(TEXT_LARGE, 6, "Y Val: %3d", odomPose.x);
-    pros::screen::print(TEXT_LARGE, 8, "Test Val: %3d", test);
+    pros::screen::print(TEXT_MEDIUM, 0, "Vert Val: %.3f", verticalTracker.get_position()/100);
+    pros::screen::print(TEXT_MEDIUM,2, "Hori Val: %.3f", horizontalTracker.get_position()/100);
+    pros::screen::print(TEXT_MEDIUM, 4, "X Val: %.3f", odomPose.y);
+    pros::screen::print(TEXT_MEDIUM, 6, "Y Val: %.3f", odomPose.x);
+    pros::screen::print(TEXT_MEDIUM, 8, "Test Val: %.3f", test);
 
     // Save previous pose
     Pose prevPose = odomPose;
@@ -73,7 +72,8 @@ void updateOdom_fn(void* param){
     test++;
 
     mutex.give();
-    pros::Task::delay_until(&startTime, 20);
+    pros::delay(20);
+    //pros::Task::delay_until(&startTime, 20);
  }
 }
 

@@ -22,6 +22,7 @@ uint8_t auton = AUTO_NUMBER;
 void initialize(){
 	//initBarGraph();
 	//pros::Task brainDisplayTask(updateBarGraph_fn);
+  pros::lcd::initialize();
 	drive.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
   lift.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
   

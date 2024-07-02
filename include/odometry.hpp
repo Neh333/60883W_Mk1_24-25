@@ -1,11 +1,6 @@
-#include "main.h"
-#include "pros/rotation.hpp"
 #include "parametrics.hpp"
-#include "pros/rtos.hpp"
-#include <cstddef>
-#include <memory>
 
-extern Pose odomPose;
+extern Pose globalPose;
 double degreeToInch(double deg);
 double inchToDegree(double inch);
 void updateOdom_fn(void* param);

@@ -51,7 +51,6 @@ void Drive::updateIntegral(double error, double lastError, double activeDistance
       }
     }
 }
-
  
 /* Returns the result of the PID calculation, updates integral */
 double Drive::updatePID(double KP, double KI, double KD, double error, double lastError, 
