@@ -8,6 +8,8 @@
 #include <cmath>
 
 Pose odomPose = Pose(0,0,0);
+double horizontalOffset = 3;
+double verticalOffset = 1;
 
 double degreeToInch(double deg) {
   return (deg * ((2*M_PI)/360) );
@@ -18,74 +20,64 @@ double inchToDegree(double inch) {
 }
 
 void updateOdom_fn(void *param){
-
  horizontalTracker.reset_position();
  verticalTracker.reset_position();
 
  double prevVertical = 0;
  double prevHorizontal = 0;
- double prevImu = 0;
+ double prevHeading = 0;
  double prevTheta = 0;
 
+ double localX, localY;
+ 
  while (true) {
- /* Get the current sensor values */
-    float verticalRaw = degreeToInch(verticalTracker.get_position()/100);
-    float horizontalRaw = degreeToInch(horizontalTracker.get_position()/100);
-    float imuRaw = degToRad(imu.get_rotation());
+  if (!imu.is_calibrating()) {
+  /* Get the current sensor values */
+  double verticalRaw = degreeToInch(verticalTracker.get_position()/100);
+  double horizontalRaw = degreeToInch(horizontalTracker.get_position()/100);
+  double heading = degToRad(360 - imu.get_heading()) + 0.0000000000000001; //hacky nan issue fix
 
-    // Calculate the change in sensor values
-    float deltaVertical = verticalRaw - prevVertical;
-    float deltaHorizontal = horizontalRaw - prevHorizontal;
-    float deltaImu = imuRaw - prevImu;
+  // Calculate the change in sensor values
+  double deltaVertical = verticalRaw - prevVertical;
+  double deltaHorizontal = horizontalRaw - prevHorizontal;
+  double deltaHeading = heading - prevHeading;
 
-    // Update the previous sensor values
-    prevVertical = verticalRaw;
-    prevHorizontal = horizontalRaw;
-    prevImu = imuRaw;
+  // Calculate local x and y
+  if (fabs(deltaHeading) == 0) { // Prevent division by zero
+    localX = deltaHorizontal;
+    localY = deltaVertical;
+  } 
+  
+  else {
+    localX = (2*sin(deltaHeading/2))*((deltaHorizontal / deltaHeading) + horizontalOffset);
+    localY = (2*sin(deltaHeading/2))*((deltaVertical / deltaHeading) + verticalOffset);
+  }
 
-    float heading = odomPose.theta;
+  double avgHeading = (heading+prevHeading)/2;
+  double deltaX = localX*cos(avgHeading) - localY*sin(avgHeading);
+  double deltaY = localX*sin(avgHeading) + localY*cos(avgHeading);
 
-    /* Calculate the heading using the horizontal tracking wheels */
-    //heading -= deltaHorizontal / horizontalOffset;
+  odomPose.x += deltaX;
+  odomPose.y += deltaY;
 
-    /* Use the vertical tracking wheels */
-    //heading -= deltaVertical / verticalOffset;
+  // Update the previous sensor values
+  prevVertical = verticalRaw;
+  prevHorizontal = horizontalRaw;
+  prevHeading = heading;
 
-    /* Use the IMU */
-    //heading += deltaImu;
+  pros::lcd::print(0, "X Val: %.3f", odomPose.x);
+  pros::lcd::print(1, "Y Val: %.3f", odomPose.y);
+  pros::lcd::print(2, "local X: %.3f", localX);
+  pros::lcd::print(3, "local Y: %.3f", localY);
+  pros::lcd::print(4, "imu heading val: %.3f", imu.get_heading());
+  pros::lcd::print(5, "heading: %.3f", heading);
+  //pros::lcd::print(6, "prev heading: %.3f", prevHeading);
+  //pros::lcd::print(7, "delta heading: %.3f", deltaHeading);
+  pros::lcd::print(6, "delta X: %.3f", deltaX);
+  pros::lcd::print(7, "delta Y: %.3f", deltaY);
 
-    float deltaHeading = heading - odomPose.theta;
-    float avgHeading = odomPose.theta + deltaHeading / 2;
-
-    // Calculate change in x and y
-    float deltaX = deltaHorizontal;
-    float deltaY = deltaVertical;
-
-    // Calculate local x and y
-    float localX, localY;
-
-    if (fabs(deltaHeading) < 0) { // Prevent division by zero
-        localX = deltaX;
-        localY = deltaY;
-    } 
-    
-    else {
-        localX = 2 * sin(deltaHeading / 2) * (deltaX / deltaHeading /*+ horizontalOffset*/);
-        localY = 2 * sin(deltaHeading / 2) * (deltaY / deltaHeading /*+ verticalOffset*/);
-    }
-
-    // Calculate global x and y
-    odomPose.x += localX * cos(avgHeading) - localY * sin(avgHeading);
-    odomPose.y += localX * sin(avgHeading) + localY * cos(avgHeading);
-
-    odomPose.theta = heading;
-
-    pros::lcd::print(0, "Vert Val: %.3f", verticalTracker.get_position()/100);
-    pros::lcd::print(2, "Hori Val: %.3f", horizontalTracker.get_position()/100);
-    pros::lcd::print(4, "X Val: %.3f", odomPose.x);
-    pros::lcd::print(6, "Y Val: %.3f", odomPose.y);
-
-    pros::delay(20);
+  pros::delay(20);
+ }
  }
 }
  
