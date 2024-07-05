@@ -1,6 +1,7 @@
 #include "auton.hpp"
 #include "drive.hpp"
 #include "include.hpp"
+#include "pros/rtos.hpp"
 //#include "lvgl_funcs.hpp"`
 
 #define AUTO_NUMBER 8
@@ -116,7 +117,13 @@ void opcontrol() {
 
    if (controller.get_digital(DIGITAL_R1)) 
    {
-     lift.move_voltage(12000);
+     pros::Task inlineTask {[]{
+       while (liftRot.get_position()>3600) {
+         lift.move_velocity(12000);
+       }
+      }};
+
+     //lift.move_voltage(12000);
    }
    else if (controller.get_digital(DIGITAL_R2)) 
    {

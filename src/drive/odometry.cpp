@@ -27,58 +27,51 @@ void updateOdom_fn(void *param){
  double prevHorizontal = 0;
  double prevHeading = 0;
  double prevTheta = 0;
-
  double localX, localY;
  
  while (true) {
-  if (!imu.is_calibrating()) {
-  /* Get the current sensor values */
-  double verticalRaw = degreeToInch(verticalTracker.get_position()/100);
-  double horizontalRaw = degreeToInch(horizontalTracker.get_position()/100);
-  double heading = degToRad(360 - imu.get_heading()) + 0.0000000000000001; //hacky nan issue fix
+   if (!imu.is_calibrating()) {
+     /* Get the current sensor values */
+     const double verticalRaw = degreeToInch(verticalTracker.get_position()/100);
+     const double horizontalRaw = degreeToInch(horizontalTracker.get_position()/100);
+     const double heading = degToRad(360 - imu.get_heading());
 
-  // Calculate the change in sensor values
-  double deltaVertical = verticalRaw - prevVertical;
-  double deltaHorizontal = horizontalRaw - prevHorizontal;
-  double deltaHeading = heading - prevHeading;
+     // Calculate the change in sensor values
+     double deltaVertical = verticalRaw - prevVertical;
+     double deltaHorizontal = horizontalRaw - prevHorizontal;
+     double deltaHeading = heading - prevHeading;
 
-  // Calculate local x and y
-  if (fabs(deltaHeading) == 0) { // Prevent division by zero
-    localX = deltaHorizontal;
-    localY = deltaVertical;
-  } 
+     // Calculate local x and y
+     if (fabs(deltaHeading) == 0) { // Prevent division by zero
+       localX = deltaHorizontal;
+       localY = deltaVertical;
+     } 
   
-  else {
-    localX = (2*sin(deltaHeading/2))*((deltaHorizontal / deltaHeading) + horizontalOffset);
-    localY = (2*sin(deltaHeading/2))*((deltaVertical / deltaHeading) + verticalOffset);
+     else {
+       localX = (2*sin(deltaHeading/2))*((deltaHorizontal / deltaHeading) + horizontalOffset);
+       localY = (2*sin(deltaHeading/2))*((deltaVertical / deltaHeading)   + verticalOffset);
+     }
+
+     double avgHeading = (heading+prevHeading)/2;
+
+     double deltaX = localX*cos(avgHeading) - localY*sin(avgHeading);
+     double deltaY = localX*sin(avgHeading) + localY*cos(avgHeading);
+
+     odomPose.x += deltaX;
+     odomPose.y += deltaY;
+
+     // Update the previous sensor values
+     prevVertical = verticalRaw;
+     prevHorizontal = horizontalRaw;
+     prevHeading = heading;
+
+     pros::lcd::print(0, "X Val: %.3f", odomPose.x);
+     pros::lcd::print(1, "Y Val: %.3f", odomPose.y);
+     pros::lcd::print(4, "imu heading val: %.3f", imu.get_heading());
+
+     pros::delay(20);
+    }
   }
-
-  double avgHeading = (heading+prevHeading)/2;
-  double deltaX = localX*cos(avgHeading) - localY*sin(avgHeading);
-  double deltaY = localX*sin(avgHeading) + localY*cos(avgHeading);
-
-  odomPose.x += deltaX;
-  odomPose.y += deltaY;
-
-  // Update the previous sensor values
-  prevVertical = verticalRaw;
-  prevHorizontal = horizontalRaw;
-  prevHeading = heading;
-
-  pros::lcd::print(0, "X Val: %.3f", odomPose.x);
-  pros::lcd::print(1, "Y Val: %.3f", odomPose.y);
-  pros::lcd::print(2, "local X: %.3f", localX);
-  pros::lcd::print(3, "local Y: %.3f", localY);
-  pros::lcd::print(4, "imu heading val: %.3f", imu.get_heading());
-  pros::lcd::print(5, "heading: %.3f", heading);
-  //pros::lcd::print(6, "prev heading: %.3f", prevHeading);
-  //pros::lcd::print(7, "delta heading: %.3f", deltaHeading);
-  pros::lcd::print(6, "delta X: %.3f", deltaX);
-  pros::lcd::print(7, "delta Y: %.3f", deltaY);
-
-  pros::delay(20);
- }
- }
 }
  
 
@@ -292,8 +285,8 @@ double Drive::swerve_To(Direction dir, Pose targetPose, double timeOut, double m
  const Pose initalPose = odomPose;
 
  /* Scheduling variables */
- bool scheduled = swerveThresholds.first == NO_SCHEDULING;
- bool scheduled_a = swerveThresholds.second == NO_SCHEDULING;
+ bool scheduled = (swerveThresholds.first == NO_SCHEDULING);
+ bool scheduled_a = (swerveThresholds.second == NO_SCHEDULING);
  double myKP = this->kP, myKI = this->kI, myKD = this->kD;
  double myKP_a = this->kP_a, myKI_a = this->kI_a, myKD_a = this->kD_a;
 
@@ -349,17 +342,11 @@ double Drive::swerve_To(Direction dir, Pose targetPose, double timeOut, double m
     /*check to make sure if d needs to use init or current and adjust acordingly*/
     const double d =  odomPose.distance(targetPose);
 
-    /* calculate the carrot point 
-    *
-    *
-    */
+    /* calculate the carrot point */
     Coord carrot(targetPose.x - d * cos(targetPose.theta) * dlead,
 			           targetPose.y - d * sin(targetPose.theta) * dlead);
 
     error = odomPose.distance(carrot);
-
-
-    
   } 
  /* Tell the onError task that the PID is over, then return the error at time of exit */
  moveDriveVoltage(0);
