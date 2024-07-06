@@ -50,7 +50,7 @@ double Drive::move(Direction dir, double target, double timeOut, double maxVeloc
     finalVolt = std::clamp(finalVolt, -maxVolt, maxVolt);
 
     // Print statement used for testing
-    controller.print(2, 0, "Error: %.2f", tickToInch(error));
+    controller.print(2, 0, "Error: %.4f", tickToInch(error));
 
     // Check if robot is in standstill and updates the standstill flag accordingly
     updateStandstill(lateral, standStill, error, lastError, standStillCount);
@@ -125,7 +125,7 @@ double Drive::turn(Direction dir, double target, double timeOut, double maxVeloc
     finalVolt = std::clamp(finalVolt, -maxVolt_a, maxVolt_a);
 
     // Print statement used for testing
-    controller.print(2, 0, "Error:     %.2f", error);
+    controller.print(2, 0, "Error: %.4f", error);
 
     /* Calculate standstill */
     updateStandstill(lateral, standStill, error, lastError, standStillCount);
@@ -184,7 +184,7 @@ double Drive::hardStop(Direction dir, double targetCutOff, double target, double
      finalVolt = updatePID(myKP, 0, myKD, error, lastError, zero, 0);
      
      //print error value for tuning
-     controller.print(2,0, "Error: %.2f", tickToInch(error));
+     controller.print(2,0, "Error: %.4f", tickToInch(error));
      
      /* Calculate the product of heading drift and kP_d */
      errorDrift = fmod((initialHeading-imu->get_heading()+540),360) - 180;
@@ -273,7 +273,7 @@ double Drive::swerve(Direction dir, double target, double target_a, double timeO
     workingVolt = std::clamp(workingVolt, -maxVolt_a, maxVolt_a);
 
     //print error value for tuning
-    controller.print(2,0, "Error: %.2f", tickToInch(error));
+    //controller.print(2,0, "Error: %.4f", tickToInch(error));
 
     /* Calculate standstill */
     updateStandstill(lateral, standStill_a, error_a, lastError_a, standStillCount_a);
@@ -284,7 +284,7 @@ double Drive::swerve(Direction dir, double target, double target_a, double timeO
     finalVoltRight += reverseVal_a*(-workingVolt);
     finalVoltLeft += reverseVal_a*(workingVolt);
     /********************************************MOVE****************************************************/
-    //master.print(2,0,"%.2f ,%.2f, %.2f            ", tickToInch(error), error_a, target_a);
+    controller.print(2,0,"E: %.4f, EA: %.4f       ", tickToInch(error), error_a);
 
     /* Move Drivetrain */
     moveRightDriveVoltage(finalVoltRight);

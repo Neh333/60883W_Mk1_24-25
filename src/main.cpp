@@ -9,14 +9,14 @@ uint8_t auton = AUTO_NUMBER;
 
 #define AUTO_SWITCH(){ \
 	switch(auton%AUTO_NUMBER){\
-    case 0:  controller.print(2, 0, "Win Point   %.2f               ",drive.imu->get_heading()); break;\
-		case 1:  controller.print(2, 0, "Left Side   %.2f               ",imu.get_heading()); break;\
-		case 2:  controller.print(2, 0, "Right Side  %.2f               ",imu.get_heading()); break;\
-		case 3:  controller.print(2, 0, "Left Elims  %.2f               ",imu.get_heading()); break;\
-		case 4:  controller.print(2, 0, "Right Elims %.2f               ",imu.get_heading()); break;\
-    case 5:  controller.print(2, 0, "Skills      %.2f               ",imu.get_heading()); break;\
-		case 6:  controller.print(2, 0, "Nothing     %.2f               ",imu.get_heading()); break;\
-    case 7:  controller.print(2, 0, "Tune        %.2f               ",imu.get_heading()); break;\
+    case 0:  controller.print(2, 0, "Win Point   %.4f               ",imu.get_heading()); break;\
+		case 1:  controller.print(2, 0, "Left Side   %.4f               ",imu.get_heading()); break;\
+		case 2:  controller.print(2, 0, "Right Side  %.4f               ",imu.get_heading()); break;\
+		case 3:  controller.print(2, 0, "Left Elims  %.4f               ",imu.get_heading()); break;\
+		case 4:  controller.print(2, 0, "Right Elims %.4f               ",imu.get_heading()); break;\
+    case 5:  controller.print(2, 0, "Skills      %.4f               ",imu.get_heading()); break;\
+		case 6:  controller.print(2, 0, "Nothing     %.4f               ",imu.get_heading()); break;\
+    case 7:  controller.print(2, 0, "Tune        %.4f               ",imu.get_heading()); break;\
 	}\
 }\
 
@@ -93,15 +93,13 @@ void opcontrol() {
       
    /*Reset all sensors*/
    if(controller.get_digital_new_press(DIGITAL_UP)){
-     //drive.odom->calibrate();
+     imu.reset();
      while(drive.imu->is_calibrating()){
-       controller.print(2,0,"Calibrating");
+       controller.print(2,0,"Calibrating:");
        pros::delay(20);
      }
    } 
-     
-   /*Calibrate Odom*/
-  // else if (controller.get_digital_new_press(DIGITAL_B)){drive.odom->calibrate(false);}
+    
 
    /*DRIVER CONTROL */
    arcade_standard(5);
@@ -122,8 +120,6 @@ void opcontrol() {
          lift.move_velocity(12000);
        }
       }};
-
-     //lift.move_voltage(12000);
    }
    else if (controller.get_digital(DIGITAL_R2)) 
    {

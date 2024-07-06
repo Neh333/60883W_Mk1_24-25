@@ -20,6 +20,7 @@ double inchToDegree(double inch) {
 }
 
 void updateOdom_fn(void *param){
+ odomPose = Pose(0,0,0);
  horizontalTracker.reset_position();
  verticalTracker.reset_position();
 
