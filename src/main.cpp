@@ -2,21 +2,21 @@
 #include "drive.hpp"
 #include "include.hpp"
 #include "pros/rtos.hpp"
-//#include "lvgl_funcs.hpp"`
+#include "lvgl_funcs.hpp"`
 
 #define AUTO_NUMBER 8
 uint8_t auton = AUTO_NUMBER; 
 
 #define AUTO_SWITCH(){ \
 	switch(auton%AUTO_NUMBER){\
-    case 0:  controller.print(2, 0, "Win Point   %.4f               ",imu.get_heading()); break;\
-		case 1:  controller.print(2, 0, "Left Side   %.4f               ",imu.get_heading()); break;\
-		case 2:  controller.print(2, 0, "Right Side  %.4f               ",imu.get_heading()); break;\
-		case 3:  controller.print(2, 0, "Left Elims  %.4f               ",imu.get_heading()); break;\
-		case 4:  controller.print(2, 0, "Right Elims %.4f               ",imu.get_heading()); break;\
-    case 5:  controller.print(2, 0, "Skills      %.4f               ",imu.get_heading()); break;\
-		case 6:  controller.print(2, 0, "Nothing     %.4f               ",imu.get_heading()); break;\
-    case 7:  controller.print(2, 0, "Tune        %.4f               ",imu.get_heading()); break;\
+    case 0:  controller.print(2, 0, "Win Point %.2f                ",imu.get_heading()); break;\
+		case 1:  controller.print(2, 0, "Left Side %.2f                ",imu.get_heading()); break;\
+		case 2:  controller.print(2, 0, "Right Side %.2f               ",imu.get_heading()); break;\
+		case 3:  controller.print(2, 0, "Left Elims %.2f               ",imu.get_heading()); break;\
+		case 4:  controller.print(2, 0, "Right Elims %.2f              ",imu.get_heading()); break;\
+    case 5:  controller.print(2, 0, "Skills      %.2f              ",imu.get_heading()); break;\
+		case 6:  controller.print(2, 0, "Nothing %.2f                  ",imu.get_heading()); break;\
+    case 7:  controller.print(2, 0, "Tune %.2f                     ",imu.get_heading()); break;\
 	}\
 }\
 
