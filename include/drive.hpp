@@ -60,19 +60,21 @@ struct slewProfile
 };
 
 // Initialize PID Values
-const PIDprofile PIDConstants[8] = {
+const PIDprofile PIDConstants[9] = {
 /*{kP, kPa, kI, kIa, kD,  kDa,  kPd}*/
-  {25,  340,  0,  0, 100,  40,   40},/*init prfoile of 60+ degree turns / lateral 22+*/
+  {25,  340,  0,  0, 100,  40,    40},/*init prfoile of 60+ degree turns / lateral 22+*/
 
   {20,  152,  0,  13, 100, 382,   40},/*40+ degree turns / 2+ inch lateral (no scheduling)*/ 
 
-  {25,    0,  0,   0,  70,   0,   40}, /*40+ inch, mogo turning 60+ degree turns*/ 
+  {25,    0,  0,   0,  70,  30,   40}, /* 10+ degree turns, 40+ inch normal weight (no scheduling)*/ 
+
+  {20,  400,  0,   0, 120,   100, 20}, /*mogo turning 60+ degree turns, mogo lateral 22+*/ 
  
   /***********Scheduled**************/
    
-  {20,  150, 0,   0, 150, 430,   0},/*scheduled for index[0], starting at 15 deg and 10 in of error*/
+  {20,  150, 0,  0, 150, 430,      0},/*scheduled for index[0], starting at 15 deg and 10 in of error*/
 
-  {20,  0, 0,   0,   0,     0,   0},/*scheduled for index[2], starting at 20 deg*/
+  {30,  140, 0, 18, 100, 547,     20},/*scheduled for index[3], starting at 20 deg and 10 in of error*/
    
  
   /***********SWERVES**************/

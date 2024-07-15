@@ -2,7 +2,6 @@
 #include "include.hpp"
 #include "pros/rtos.hpp"
 #include "util.hpp"
-#include <ranges>
 #include "auton.hpp"
 
 /* Create an array of auton-text tuples to be used with the auton-selector */
@@ -18,13 +17,14 @@ autonTextTuple autos[AUTO_COUNT] = {
 };
 
 Drive drive(leftMotors, rightMotors, imu);
+slewProfile mogoProfile{90, 30, 70};
 
 void winPoint(){
  pros::Task odomTask(updateOdom_fn);
  pros::Task runOnError(onError_fn);
  drive.setScheduleThreshold_a(15);
  drive.setScheduleThreshold_l(10);
- drive.setScheduledConstants(PIDConstants[3]);
+ drive.setScheduledConstants(PIDConstants[4]);
  
  drive.addErrorFunc(8, LAMBDA(intake.move_voltage(12000)));
  drive.move(forward, 36, 2, 90);
@@ -33,7 +33,7 @@ void winPoint(){
                                 /*{kP, kPa, kI, kIa, kD,  kDa,  kPd}*/
  drive.setScheduledSwerveConstants({0, 200,  0,   0,  0,  400,  0});
  drive.turn(right, imuTarget(90), 1, 100);
- drive.setScheduledConstants(PIDConstants[3]);
+ drive.setScheduledConstants(PIDConstants[4]);
 
  drive.move(backward, 22, 1, 70);
 
@@ -98,16 +98,22 @@ void nothing(){}
 void tune(){
  pros::Task odomTask(updateOdom_fn);
  pros::Task runOnError(onError_fn);
- //drive.setScheduleThreshold_a(20);
- //drive.setScheduleThreshold_l(10);
- //drive.setScheduledConstants(PIDConstants[4]);
+ drive.setScheduleThreshold_a(20);
+ drive.setScheduleThreshold_l(10);
+ drive.setScheduledConstants(PIDConstants[5]);
 
- drive.setPID(3);
- 
- drive.turn(right, 30, 1, 70);
+ drive.setPID(4);
+ drive.setSlew(mogoProfile);
+
+ drive.move(forward, 22, 1, 100);
  pros::delay(1000);
+ drive.move(forward, 32, 2, 100);
+ pros::delay(1000);
+ drive.move(forward, 42, 2, 100);
+ pros::delay(2000);
 
- drive.turn(right, 45, 1, 70);
+ /*
+ drive.turn(right, 50, 1, 70);
  pros::delay(1000);
 
  drive.turn(right, 60, 1, 70);
@@ -136,6 +142,7 @@ void tune(){
 
  drive.turn(right, 180, 2, 70);
  pros::delay(1000);
+ */
 
  runOnError.remove();
  drive.onErrorVector.clear();
