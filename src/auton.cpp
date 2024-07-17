@@ -25,70 +25,83 @@ void winPoint(){
  drive.setScheduleThreshold_a(15);
  drive.setScheduleThreshold_l(10);
  drive.setScheduledConstants(PIDConstants[4]);
- 
- drive.addErrorFunc(8, LAMBDA(intake.move_voltage(12000)));
- drive.move(forward, 36, 2, 90);
 
- pros::delay(500);
-                                /*{kP, kPa, kI, kIa, kD,  kDa,  kPd}*/
- drive.setScheduledSwerveConstants({0, 200,  0,   0,  0,  400,  0});
- drive.turn(right, imuTarget(90), 1, 100);
- drive.setScheduledConstants(PIDConstants[4]);
-
- drive.move(backward, 22, 1, 70);
+ drive.addErrorFunc(10, LAMBDA(drive.setMaxVelocity(50)));
+ drive.move(backward, 34, 2, 100);
 
  mogoMechPisses.set_value(true);
 
- pros::delay(2000);
+ intake.move_voltage(12000);
+ pros::delay(700);
 
- drive.setPID(3);
- drive.turn(left, imuTarget(250), 1, 70);
+ drive.setPID(4);
+ drive.setScheduleThreshold_a(20);
+ drive.setScheduledConstants(PIDConstants[5]);
+ drive.setSlew(mogoProfile);
 
- intake.move_voltage(-12000);
+ drive.turn(left, imuTarget(260), 2, 70);
+ 
+ drive.addErrorFunc(6, LAMBDA(drive.setMaxVelocity(60)));
+ drive.move(forward, 26, 2, 100);
+  
+ drive.turn(shortest, 60, 2, 70);
 
- drive.setPID(1);
- drive.move(forward, 32, 2, 100);
+ pros::delay(700);
 
+ mogoMechPisses.set_value(false);
+ 
+ drive.setPID(8);
+ drive.setScheduleThresholds_s(0, 0);
+ drive.setScheduledSwerveConstants(PIDConstants[6]);
+
+ drive.swerve(forwardRight, 50, imuTarget(90), 3, 100, 20);
+
+ odomTask.remove();
  runOnError.remove();
  drive.onErrorVector.clear();
 }
 
 void leftSide(){
- //drive.odom->init();
+ pros::Task odomTask(updateOdom_fn);
  pros::Task runOnError(onError_fn);
 
+ odomTask.remove();
  runOnError.remove();
  drive.onErrorVector.clear();
 }
 
 void rightSide(){
- //drive.odom->init();
+ pros::Task odomTask(updateOdom_fn);
  pros::Task runOnError(onError_fn);
 
+ odomTask.remove();
  runOnError.remove();
  drive.onErrorVector.clear();
 }
 
 void leftElim(){
- //drive.odom->init();
+  pros::Task odomTask(updateOdom_fn);
  pros::Task runOnError(onError_fn);
 
+ odomTask.remove();
  runOnError.remove();
  drive.onErrorVector.clear();
 }
 
 void rightElim(){
- //drive.odom->init();
+ pros::Task odomTask(updateOdom_fn);
  pros::Task runOnError(onError_fn);
 
+ odomTask.remove();
  runOnError.remove();
  drive.onErrorVector.clear();
 }
 
 void skills(){
- //drive.odom->init();
+  pros::Task odomTask(updateOdom_fn);
  pros::Task runOnError(onError_fn);
 
+ odomTask.remove();
  runOnError.remove();
  drive.onErrorVector.clear();
 }
@@ -98,21 +111,25 @@ void nothing(){}
 void tune(){
  pros::Task odomTask(updateOdom_fn);
  pros::Task runOnError(onError_fn);
- drive.setScheduleThreshold_a(20);
  drive.setScheduleThreshold_l(10);
+
+ 
+ drive.setScheduleThreshold_a(20);
+ drive.setPID(4);
  drive.setScheduledConstants(PIDConstants[5]);
 
- drive.setPID(4);
  drive.setSlew(mogoProfile);
 
+ /*
  drive.move(forward, 22, 1, 100);
  pros::delay(1000);
  drive.move(forward, 32, 2, 100);
  pros::delay(1000);
  drive.move(forward, 42, 2, 100);
  pros::delay(2000);
+ */ 
 
- /*
+ 
  drive.turn(right, 50, 1, 70);
  pros::delay(1000);
 
@@ -133,6 +150,7 @@ void tune(){
  
  drive.turn(right, 135, 2, 70);
  pros::delay(1000);
+ 
 
  drive.turn(right, 150, 2, 70);
  pros::delay(1000);
@@ -142,8 +160,15 @@ void tune(){
 
  drive.turn(right, 180, 2, 70);
  pros::delay(1000);
- */
 
+ drive.turn(right, 195, 2, 70);
+ pros::delay(1000);
+
+ drive.turn(right, 205, 2, 70);
+ pros::delay(1000);
+ 
+
+ odomTask.remove();
  runOnError.remove();
  drive.onErrorVector.clear();
 }

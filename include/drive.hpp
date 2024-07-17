@@ -1,4 +1,4 @@
-#pragma once
+  #pragma once
 #include "main.h"
 #include "parametrics.hpp"
 #include "odometry.hpp"
@@ -72,16 +72,16 @@ const PIDprofile PIDConstants[9] = {
  
   /***********Scheduled**************/
    
-  {20,  150, 0,  0, 150, 430,      0},/*scheduled for index[0], starting at 15 deg and 10 in of error*/
+  {20,  150, 0,  0, 150, 430,      0},/*scheduled for profile 1, starting at 15 deg and 10 in of error*/
 
-  {30,  140, 0, 18, 100, 547,     20},/*scheduled for index[3], starting at 20 deg and 10 in of error*/
+  {30,  140, 0, 18, 100, 547,     20},/*scheduled for profile 4, starting at 20 deg and 10 in of error*/
+
+  {20,  150, 0,  0, 150, 430,      0},/*scheduledforprofile at _ deg & _ in*/
    
  
   /***********SWERVES**************/
 
-  {17,  190,  0,  0, 50,   20,    0},/*first far swerve*/
-
-  {18,  205,  0,  0, 52,  800,    0},/*last close swerve FL*/
+  {25,  340,  0,  0, 100,  40,    40},/*last close swerve FL*/
 
   {18,  157,  0,  0, 60,   801,   0}/*far quals side elevation swerve / close side long swerve*/
 };
