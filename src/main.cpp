@@ -117,7 +117,7 @@ void opcontrol() {
    {
      pros::Task inlineTask {[]{
        while (liftRot.get_position()>3600) {
-         lift.move_velocity(12000);
+         lift.move_velocity(11000);
        }
       }};
    }

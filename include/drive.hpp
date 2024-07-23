@@ -5,8 +5,9 @@
 #include "util.hpp"
 #include <utility>
 
-#define INTEGRAL_MAX 800.0
-#define NO_SCHEDULING -1.f
+//better than a macro soo
+const double INTEGRAL_MAX = 800.0;
+const double NO_SCHEDULING = -1.f;
 
 enum Direction{
   forward,
@@ -76,14 +77,11 @@ const PIDprofile PIDConstants[9] = {
 
   {30,  140, 0, 18, 100, 547,     20},/*scheduled for profile 4, starting at 20 deg and 10 in of error*/
 
-  {20,  150, 0,  0, 150, 430,      0},/*scheduledforprofile at _ deg & _ in*/
-   
+  {0,   90,  0, 0,   0,  400,     0},/*scheduled for profile 8, at 15 deg & 10 in of erorr*/
  
   /***********SWERVES**************/
 
-  {25,  340,  0,  0, 100,  40,    40},/*last close swerve FL*/
-
-  {18,  157,  0,  0, 60,   801,   0}/*far quals side elevation swerve / close side long swerve*/
+  {21,  200,  0, 0,  50,  130,     0},/*AWP swerve*/
 };
 
 class Drive{
@@ -100,7 +98,7 @@ class Drive{
  double error;
   
  const double integralActive = inchToTick(3);
- const int integralActive_a = 15;
+ const double integralActive_a = 15;
 
  double maxVolt;
  double maxVolt_a;
@@ -121,9 +119,12 @@ class Drive{
  /*PID updater methods*/ 
  double updatePID(double KP, double KI, double KD, double error, double lastError, double &integral, 
                  double integralActive);
+
  void updateIntegral(double error, double lastError, double activeDistance, double& integral);
+
  void updateStandstill(movement_Type type, bool& standStill, double error, double lastError,
                          uint8_t& standStillCount);
+
  void calculateSlew(double *voltage, double actualVelocity, slewProfile *profile);
 
  /*"Virtual" Drivetrain methods*/
@@ -140,14 +141,11 @@ class Drive{
  public:
  /*Drive object constructors*/ 
  Drive(pros::MotorGroup &leftMotors, pros::MotorGroup &rightMotors, pros::Imu &imu);
- //Drive(pros::MotorGroup &leftMotors, pros::MotorGroup &rightMotors, Odometry& odometry);
 
  /*"Virtual" Drivetrain attributes and methods*/ 
  pros::MotorGroup *rightMotors;
  pros::MotorGroup *leftMotors;
  pros::Imu        *imu;
- 
- //class Odometry* odom;
 
  void setBrakeMode(pros::motor_brake_mode_e brakeMode);
 
@@ -201,7 +199,7 @@ class Drive{
  /*P Based brake loop*/
  double brake(double timeOut);
  
- /************************************************ODOMETRY*************************************************************/
+ /********************************************ODOMETRY MOVRMENTS*************************************************************/
 
  /* Movement Functions, Return error after movement is finished */
  double move_to(Direction dir, Coord targetPoint, double timeOut, double maxVelocity);
@@ -212,6 +210,7 @@ class Drive{
   
  /*Swerve Movemnet Function*/                 
  double swerve_To(Direction dir, Pose targetPose, double timeOut, double maxVel, double maxVel_a, double dlead);
+
 };
 
 /*Drive object instance declartion*/

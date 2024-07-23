@@ -272,8 +272,7 @@ double Drive::swerve(Direction dir, double target, double target_a, double timeO
     calculateSlew(&workingVolt, actualVelocityLeft() - actualVelocityRight(), &slewProf_a);
     workingVolt = std::clamp(workingVolt, -maxVolt_a, maxVolt_a);
 
-    //print error value for tuning
-    //controller.print(2,0, "Error: %.4f", tickToInch(error));
+    
 
     /* Calculate standstill */
     updateStandstill(lateral, standStill_a, error_a, lastError_a, standStillCount_a);
@@ -284,7 +283,10 @@ double Drive::swerve(Direction dir, double target, double target_a, double timeO
     finalVoltRight += reverseVal_a*(-workingVolt);
     finalVoltLeft += reverseVal_a*(workingVolt);
     /********************************************MOVE****************************************************/
-    controller.print(2,0,"E: %.4f, EA: %.4f       ", tickToInch(error), error_a);
+    //print error value for tuning
+    //controller.print(2,0,"E: %.4f, EA: %.4f", tickToInch(error), error_a);
+    //controller.print(2,0, "EA: %.4f", error_a);
+    controller.print(2,0, "Error: %.4f", tickToInch(error));
 
     /* Move Drivetrain */
     moveRightDriveVoltage(finalVoltRight);
