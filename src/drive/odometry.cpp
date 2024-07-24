@@ -68,7 +68,7 @@ void updateOdom_fn(void *param){
 
      pros::lcd::print(0, "X Val: %.3f", odomPose.x);
      pros::lcd::print(1, "Y Val: %.3f", odomPose.y);
-     pros::lcd::print(4, "imu heading val: %.3f", imu.get_heading());
+     pros::lcd::print(2, "imu heading val: %.3f", imu.get_heading());
 
      pros::delay(20);
     }

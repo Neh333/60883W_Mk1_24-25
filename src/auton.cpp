@@ -3,29 +3,44 @@
 #include "pros/rtos.hpp"
 #include "util.hpp"
 #include "auton.hpp"
+#include <functional>
 
-/* Create an array of auton-text tuples to be used with the auton-selector */
-autonTextTuple autos[AUTO_COUNT] = {
-    {winPoint, "Win Point"  },
-    {leftSide, "Left Side"  },
-    {rightSide,"Right Side" },
-    {leftElim, "Left Elims" },
-    {rightElim,"Right Elims"},
-    {skills,   "Skills"     },
-    {nothing,  "Nothing"    },
-    {tune,     "Tune"       }
+/* Create an array of auton wrappers  to be used with the auton-selector*/
+std::function<void()> autos[AUTO_NUMBER] = {
+  {winPointRed},
+  {winPointBlue},
+
+  {leftSideRed},
+  {leftSideBlue},
+
+  {rightSideRed},
+  {rightSideBlue},
+
+  {leftElimRed},
+  {leftElimBlue},
+
+  {rightElimRed},
+  {rightElimBlue},
+
+  {skills},
+  {nothing},
+  {tune}
 };
+
 
 Drive drive(leftMotors, rightMotors, imu);
 slewProfile mogoProfile{90, 30, 70};
 
-                           /*{kP, kPa, kI, kIa,  kD,  kDa,  kPd}*/
-PIDprofile weirdMogoConstants{0,  130,  0,   0,   0,  200,      0};
+void winPointRed(){
+ pros::Task odomTask(updateOdom_fn);
+ pros::Task runOnError(onError_fn);
 
-                                /*{kP, kPa, kI, kIa,  kD,  kDa,  kPd}*/
-PIDprofile weirdMogoTurnsScheduled{0,  55,  0,  15,   0,  700,  0};
+ odomTask.remove();
+ runOnError.remove();
+ drive.onErrorVector.clear();
+}
 
-void winPoint(){
+void winPointBlue(){
  pros::Task odomTask(updateOdom_fn);
  pros::Task runOnError(onError_fn);
  drive.setScheduleThreshold_a(15);
@@ -43,29 +58,33 @@ void winPoint(){
 
  pros::delay(500);
 
- drive.setCustomPID(weirdMogoConstants);
- drive.setScheduledConstants(weirdMogoTurnsScheduled);
+                  /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setCustomPID({ 0,  130,  0,   0,   0,  200,    0});
+                           /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setScheduledConstants({ 0,   55,  0,  15,   0,  750,  0});
  drive.setScheduleThreshold_a(20);
  drive.setSlew(mogoProfile);
                            
  /*IMPORTANT: two turns need tuned ig cause like weirrd friction */
 
- 
  drive.turn(left, imuTarget(260), 2, 70);
 
- pros::delay(1300); //discard afetr testing
+ pros::delay(1000);
  
  drive.setPID(4);
  drive.setScheduledConstants(PIDConstants[5]);
  drive.addErrorFunc(6, LAMBDA(drive.setMaxVelocity(60)));
  drive.move(forward, 26, 2, 100);
 
- drive.setScheduledConstants(weirdMogoTurnsScheduled);
+                   /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setCustomPID({ 0,  420,  0,   0,   0,  200,    0});
+                           /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setScheduledConstants({ 0,  185,  0,  15,   0,  700,  0});
+
  drive.turn(shortest, 50, 2, 70);
 
  pros::delay(1500); //keep this delay even afetr testing at 1500 msec
 
- /*
  mogoMechPisses.set_value(false);
  
  drive.setPID(8);
@@ -85,7 +104,7 @@ void winPoint(){
  drive.turn(right, imuTarget(155), 1, 70);
 
  pros::Task liftUp{[]{ 
-   while(liftRot.get_position()>120) 
+   while(liftRot.get_position()>1200) 
    {
       lift.move_voltage(11000);
    }
@@ -99,10 +118,10 @@ void winPoint(){
 
  odomTask.remove();
  runOnError.remove();
- drive.onErrorVector.clear();*/
+ drive.onErrorVector.clear();
 }
 
-void leftSide(){
+void leftSideRed(){
  pros::Task odomTask(updateOdom_fn);
  pros::Task runOnError(onError_fn);
 
@@ -111,7 +130,8 @@ void leftSide(){
  drive.onErrorVector.clear();
 }
 
-void rightSide(){
+
+void leftSideBlue(){
  pros::Task odomTask(updateOdom_fn);
  pros::Task runOnError(onError_fn);
 
@@ -120,16 +140,7 @@ void rightSide(){
  drive.onErrorVector.clear();
 }
 
-void leftElim(){
-  pros::Task odomTask(updateOdom_fn);
- pros::Task runOnError(onError_fn);
-
- odomTask.remove();
- runOnError.remove();
- drive.onErrorVector.clear();
-}
-
-void rightElim(){
+void rightSideRed(){
  pros::Task odomTask(updateOdom_fn);
  pros::Task runOnError(onError_fn);
 
@@ -137,6 +148,53 @@ void rightElim(){
  runOnError.remove();
  drive.onErrorVector.clear();
 }
+
+void rightSideBlue(){
+ pros::Task odomTask(updateOdom_fn);
+ pros::Task runOnError(onError_fn);
+
+ odomTask.remove();
+ runOnError.remove();
+ drive.onErrorVector.clear();
+}
+
+void leftElimRed(){
+ pros::Task odomTask(updateOdom_fn);
+ pros::Task runOnError(onError_fn);
+
+ odomTask.remove();
+ runOnError.remove();
+ drive.onErrorVector.clear();
+}
+
+void leftElimBlue(){
+ pros::Task odomTask(updateOdom_fn);
+ pros::Task runOnError(onError_fn);
+
+ odomTask.remove();
+ runOnError.remove();
+ drive.onErrorVector.clear();
+}
+
+
+void rightElimRed(){
+ pros::Task odomTask(updateOdom_fn);
+ pros::Task runOnError(onError_fn);
+
+ odomTask.remove();
+ runOnError.remove();
+ drive.onErrorVector.clear();
+}
+
+void rightElimBlue(){
+ pros::Task odomTask(updateOdom_fn);
+ pros::Task runOnError(onError_fn);
+
+ odomTask.remove();
+ runOnError.remove();
+ drive.onErrorVector.clear();
+}
+
 
 void skills(){
  pros::Task odomTask(updateOdom_fn);

@@ -3,13 +3,9 @@
 #include "math.h"
 #define MIN(a,b) ((a)<(b)?(a):(b)) //takes param "A" & "B" if A is less than B then A if not then B 
 #define MAX(a,b) ((a)>(b)?(a):(b)) //takes param "A" & "B" if A is greather than than B then A if not then B 
-#define AUTO_COUNT 8
 
-struct autonTextTuple
-{
-    std::function<void()> autonomous;
-    std::string autoName;
-};
+#define AUTO_NUMBER 13 //can'tused static types for array len
+extern uint8_t auton; 
 
 extern pros::Controller controller;
 

@@ -2,21 +2,25 @@
 #include "drive.hpp"
 #include "include.hpp"
 #include "pros/rtos.hpp"
-#include "lvgl_funcs.hpp"`
+#include "lvgl_funcs.hpp"
 
-#define AUTO_NUMBER 8
 uint8_t auton = AUTO_NUMBER; 
 
 #define AUTO_SWITCH(){ \
 	switch(auton%AUTO_NUMBER){\
-    case 0:  controller.print(2, 0, "Win Point %.2f                ",imu.get_heading()); break;\
-		case 1:  controller.print(2, 0, "Left Side %.2f                ",imu.get_heading()); break;\
-		case 2:  controller.print(2, 0, "Right Side %.2f               ",imu.get_heading()); break;\
-		case 3:  controller.print(2, 0, "Left Elims %.2f               ",imu.get_heading()); break;\
-		case 4:  controller.print(2, 0, "Right Elims %.2f              ",imu.get_heading()); break;\
-    case 5:  controller.print(2, 0, "Skills      %.2f              ",imu.get_heading()); break;\
-		case 6:  controller.print(2, 0, "Nothing %.2f                  ",imu.get_heading()); break;\
-    case 7:  controller.print(2, 0, "Tune %.2f                     ",imu.get_heading()); break;\
+    case 0:  controller.print(2, 0, "WinP-R    %.2f   ",imu.get_heading()); break;\
+    case 1:  controller.print(2, 0, "WinP-B  %.2f   ",imu.get_heading()); break;\
+		case 2:  controller.print(2, 0, "Left-R    %.2f   ",imu.get_heading()); break;\
+    case 3:  controller.print(2, 0, "Left-B   %.2f   ",imu.get_heading()); break;\
+		case 4:  controller.print(2, 0, "Right-R   %.2f   ",imu.get_heading()); break;\
+    case 5:  controller.print(2, 0, "Right-B  %.2f   ",imu.get_heading()); break;\
+		case 6:  controller.print(2, 0, "LeftE-R   %.2f   ",imu.get_heading()); break;\
+    case 7:  controller.print(2, 0, "LeftE-B %.2f   ",imu.get_heading()); break;\
+		case 8:  controller.print(2, 0, "RightE-R  %.2f   ",imu.get_heading()); break;\
+    case 9:  controller.print(2, 0, "RightE-B %.2f   ",imu.get_heading()); break;\
+    case 10: controller.print(2, 0, "Skills           %.2f   ",imu.get_heading()); break;\
+		case 11: controller.print(2, 0, "Nothing          %.2f   ",imu.get_heading()); break;\
+    case 12: controller.print(2, 0, "Tune             %.2f   ",imu.get_heading()); break;\
 	}\
 }\
 
@@ -51,7 +55,7 @@ void competition_initialize(){
 
 void autonomous(){
   /* Run the auton currently selected and displayed */
-	autos[auton%AUTO_COUNT].autonomous();
+	autos[auton%AUTO_NUMBER]();
 }
 
 void set_tank(int l_stick, int r_stick) {
@@ -80,6 +84,7 @@ void arcade_standard(double curve) {
 
 void opcontrol() {
  pros::Task updateOdom(updateOdom_fn);
+ 
  while (true) {
    /*Display current autonomous on the controller*/
    AUTO_SWITCH()
@@ -116,8 +121,8 @@ void opcontrol() {
    if (controller.get_digital(DIGITAL_R1)) 
    {
      pros::Task inlineTask {[]{
-       while (liftRot.get_position()>3600) {
-         lift.move_velocity(11000);
+       while (liftRot.get_position()>3500 || liftRot.get_position()<2) {
+         lift.move_voltage(4000);
        }
       }};
    }

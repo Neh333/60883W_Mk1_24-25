@@ -1,12 +1,25 @@
 #include "include.hpp"
-/*make auton tuple crap*/
-void winPoint();
-void leftSide();
-void rightSide();
-void leftElim();
-void rightElim();
+#include <functional>
+
+void winPointRed();
+void winPointBlue();
+
+void leftSideRed();
+void leftSideBlue();
+
+void rightSideRed();
+void rightSideBlue();
+
+void leftElimRed();
+void leftElimBlue();
+
+void rightElimRed();
+void rightElimBlue();
+
 void skills();
+
 void nothing();
 void tune();
 
-extern autonTextTuple autos[AUTO_COUNT];
+extern std::function<void()> autos[AUTO_NUMBER];
+
