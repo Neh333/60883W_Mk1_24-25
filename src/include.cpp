@@ -6,16 +6,6 @@
 //define controller
 pros::Controller controller(CONTROLLER_MASTER);
 
-/*
-pros::Motor frontleft (-2);
-pros::Motor midleft   (-11);
-pros::Motor backleft  (-20);
-
-pros::Motor frontright(12);
-pros::Motor midright  (3);
-pros::Motor backright (14);
-*/
-
 pros::MotorGroup leftMotors ({-2,-11,-20});
 pros::MotorGroup rightMotors ({12,3,14});
 

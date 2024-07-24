@@ -30,7 +30,8 @@ void updateOdom_fn(void *param){
  double prevTheta = 0;
  double localX, localY;
  
- while (true) {
+ while (true)
+  {
    if (!imu.is_calibrating()) {
      /* Get the current sensor values */
      const double verticalRaw = degreeToInch(verticalTracker.get_position()/100);
@@ -41,14 +42,20 @@ void updateOdom_fn(void *param){
      double deltaVertical = verticalRaw - prevVertical;
      double deltaHorizontal = horizontalRaw - prevHorizontal;
      double deltaHeading = heading - prevHeading;
+     if(deltaHeading >= 358)
+     {
+      deltaHeading -= 360; 
+     }
 
      // Calculate local x and y
-     if (fabs(deltaHeading) == 0) { // Prevent division by zero
+     if (fabs(deltaHeading) == 0) 
+     { // Prevent division by zero
        localX = deltaHorizontal;
        localY = deltaVertical;
      } 
   
-     else {
+     else 
+     {
        localX = (2*sin(deltaHeading/2))*((deltaHorizontal / deltaHeading) + horizontalOffset);
        localY = (2*sin(deltaHeading/2))*((deltaVertical / deltaHeading)   + verticalOffset);
      }

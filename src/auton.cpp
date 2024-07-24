@@ -103,12 +103,15 @@ void winPointBlue(){
  drive.addErrorFunc(50, LAMBDA(intake.move_voltage(0)));
  drive.turn(right, imuTarget(155), 1, 70);
 
- pros::Task liftUp{[]{ 
+ /*pros::Task liftUp{[]{ 
    while(liftRot.get_position()>1200) 
    {
       lift.move_voltage(11000);
    }
-  }};
+  }};*/
+
+  lift.move_voltage(12000);
+  pros::delay(500);
 
  drive.setPID(2);
  drive.setScheduleThreshold_l(NO_SCHEDULING);
