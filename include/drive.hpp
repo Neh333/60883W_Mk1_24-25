@@ -77,7 +77,7 @@ const PIDprofile PIDConstants[9] = {
 
   {30,  140, 0, 18, 100, 547,     20},/*scheduled for profile 4, starting at 20 deg and 10 in of error*/
 
-  {0,   90,  0, 0,   0,  400,     0},/*scheduled for profile 8, at 15 deg & 10 in of erorr*/
+  {10,   90,  0, 0,   0,  400,     0},/*scheduled for profile 8, at 15 deg & 10 in of erorr*/
  
   /***********SWERVES**************/
 

@@ -42,7 +42,7 @@ void updateOdom_fn(void *param){
      double deltaVertical = verticalRaw - prevVertical;
      double deltaHorizontal = horizontalRaw - prevHorizontal;
      double deltaHeading = heading - prevHeading;
-     if(deltaHeading >= 358)
+     if(deltaHeading > 180)
      {
       deltaHeading -= 360; 
      }

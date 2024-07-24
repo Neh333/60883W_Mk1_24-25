@@ -52,11 +52,11 @@ void winPointBlue(){
 
  mogoMechPisses.set_value(true);
 
- pros::delay(200);
+ pros::delay(100);
 
  intake.move_voltage(12000);
 
- pros::delay(500);
+ pros::delay(350);
 
                   /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
  drive.setCustomPID({ 0,  130,  0,   0,   0,  200,    0});
@@ -65,25 +65,24 @@ void winPointBlue(){
  drive.setScheduleThreshold_a(20);
  drive.setSlew(mogoProfile);
                            
- /*IMPORTANT: two turns need tuned ig cause like weirrd friction */
+ /*IMPORTANT: two turns need tuned ig cause like weird friction */
 
- drive.turn(left, imuTarget(260), 2, 70);
+ drive.turn(left, imuTarget(253), 2, 70);
 
- pros::delay(1000);
  
  drive.setPID(4);
  drive.setScheduledConstants(PIDConstants[5]);
  drive.addErrorFunc(6, LAMBDA(drive.setMaxVelocity(60)));
- drive.move(forward, 26, 2, 100);
+ drive.move(forward, 28, 2, 100);
 
                    /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
- drive.setCustomPID({ 0,  420,  0,   0,   0,  200,    0});
+ drive.setCustomPID({ 0,   420,  0,   0,   0,  200,    0});
                            /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
- drive.setScheduledConstants({ 0,  185,  0,  15,   0,  700,  0});
+ drive.setScheduledConstants({ 0,  190,  0,  15,   0,  700,  0});
 
  drive.turn(shortest, 50, 2, 70);
 
- pros::delay(1500); //keep this delay even afetr testing at 1500 msec
+ pros::delay(1200);
 
  mogoMechPisses.set_value(false);
  
@@ -92,32 +91,26 @@ void winPointBlue(){
  drive.setScheduledSwerveConstants(PIDConstants[6]);
  
  //170 degree angular movememt
- drive.swerve(forwardRight, 52, imuTarget(85), 3, 60, 5);
-
- pros::delay(1500); //to check error 
+ drive.swerve(forwardRight, 52, imuTarget(85), 3, 60, 7);
  
  drive.setPID(1);
  drive.setScheduledConstants(PIDConstants[4]);
- drive.move(forward, 24, 2, 60);
+ drive.move(forward, 20, 2, 60);
+
+ pros::delay(3000);
  
  drive.addErrorFunc(50, LAMBDA(intake.move_voltage(0)));
- drive.turn(right, imuTarget(155), 1, 70);
+ drive.turn(right, imuTarget(145), 1, 70);
 
- /*pros::Task liftUp{[]{ 
-   while(liftRot.get_position()>1200) 
-   {
-      lift.move_voltage(11000);
-   }
-  }};*/
-
-  lift.move_voltage(12000);
-  pros::delay(500);
+ lift.move_voltage(12000);
+ pros::delay(200);
+ lift.move_voltage(0);
 
  drive.setPID(2);
  drive.setScheduleThreshold_l(NO_SCHEDULING);
  drive.move(backward, 16, 1, 100);
 
- intake.move_voltage(12000);
+ pros::delay(1500);
 
  odomTask.remove();
  runOnError.remove();

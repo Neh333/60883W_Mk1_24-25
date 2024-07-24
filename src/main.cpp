@@ -118,8 +118,9 @@ void opcontrol() {
    }
    else {intake.move_voltage(0);}
    
-   /*
+   
    pros::lcd::print(3, "liftRot: %.3f", liftRot.get_angle());
+   /*
    if (controller.get_digital(DIGITAL_R1)) 
    {
      pros::Task inlineTask {[]{
