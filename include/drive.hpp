@@ -139,7 +139,7 @@ class Drive{
  struct slewProfile slewProf_a;
 
  public:
- /*Drive object constructors*/ 
+ /*Drive object constructor*/ 
  Drive(pros::MotorGroup &leftMotors, pros::MotorGroup &rightMotors, pros::Imu &imu);
 
  /*"Virtual" Drivetrain attributes and methods*/ 
@@ -147,7 +147,7 @@ class Drive{
  pros::MotorGroup *leftMotors;
  pros::Imu        *imu;
 
- void setBrakeMode(pros::motor_brake_mode_e brakeMode);
+ void setBrakeMode(pros::motor_brake_mode_e brakeMode);;
 
  void moveLeftDriveVoltage(int voltage);
  void moveRightDriveVoltage(int voltage);

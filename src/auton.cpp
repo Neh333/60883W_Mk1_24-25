@@ -91,13 +91,15 @@ void winPointBlue(){
  drive.setScheduledSwerveConstants(PIDConstants[6]);
  
  //170 degree angular movememt
- drive.swerve(forwardRight, 52, imuTarget(85), 3, 60, 7);
+ //brek out into 3 movements
+ drive.swerve(forwardRight, 52, imuTarget(85), 3, 60, 6);
  
+ //break this down 
  drive.setPID(1);
  drive.setScheduledConstants(PIDConstants[4]);
  drive.move(forward, 20, 2, 60);
 
- pros::delay(3000);
+ pros::delay(2500);
  
  drive.addErrorFunc(50, LAMBDA(intake.move_voltage(0)));
  drive.turn(right, imuTarget(145), 1, 70);

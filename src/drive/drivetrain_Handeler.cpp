@@ -1,13 +1,11 @@
 #include "drive.hpp"
 
-/*CONSTRUCTORS*/
-//Drive object constructor 
+/*CONSTRUCTOR*/
 Drive::Drive(pros::MotorGroup &leftMotors, pros::MotorGroup &rightMotors, pros::Imu &imu){
  setPID(1);
  setScheduleThreshold_l(NO_SCHEDULING);
  setScheduleThreshold_a(NO_SCHEDULING);
 
- /* slew, slew_lower_thresh, slew_upper_thresh */
  setSlew({0, 30, 80});
  setSlew_a({0, 30, 80});
 
