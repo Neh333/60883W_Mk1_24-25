@@ -1,8 +1,11 @@
 #include "drive.hpp"
 #include "include.hpp"
+#include "pros/motors.h"
+#include "pros/rtos.h"
 #include "pros/rtos.hpp"
 #include "util.hpp"
 #include "auton.hpp"
+#include "intake.hpp"
 #include <functional>
 
 /* Create an array of auton wrappers  to be used with the auton-selector*/
@@ -10,17 +13,17 @@ std::function<void()> autos[AUTO_NUMBER] = {
   {winPointRed},
   {winPointBlue},
 
-  {leftSideRed},
-  {leftSideBlue},
+  {ringSideRed},
+  {ringSideBlue},
 
-  {rightSideRed},
-  {rightSideBlue},
+  {goalSideRed},
+  {goalSideBlue},
 
-  {leftElimRed},
-  {leftElimBlue},
+  {ringElimRed},
+  {ringElimBlue},
 
-  {rightElimRed},
-  {rightElimBlue},
+  {goalElimRed},
+  {goalElimBlue},
 
   {skills},
   {nothing},
@@ -30,10 +33,12 @@ std::function<void()> autos[AUTO_NUMBER] = {
 
 Drive drive(leftMotors, rightMotors, imu);
 slewProfile mogoProfile{90, 30, 70};
+IntakeControl conveyor;
 
 void winPointRed(){
  pros::Task odomTask(updateOdom_fn);
  pros::Task runOnError(onError_fn);
+ pros::Task runIntakeControl(IntakeControlSystem_fn);
 
  odomTask.remove();
  runOnError.remove();
@@ -43,20 +48,23 @@ void winPointRed(){
 void winPointBlue(){
  pros::Task odomTask(updateOdom_fn);
  pros::Task runOnError(onError_fn);
+ pros::Task runIntakeControl(IntakeControlSystem_fn);
+
  drive.setScheduleThreshold_a(15);
  drive.setScheduleThreshold_l(10);
  drive.setScheduledConstants(PIDConstants[4]);
 
- drive.addErrorFunc(10, LAMBDA(drive.setMaxVelocity(40)));
- drive.move(backward, 34, 2, 100);
+ drive.addErrorFunc(12, LAMBDA(drive.setMaxVelocity(25)));
+ drive.move(backward, 35, 2, 100);
 
  mogoMechPisses.set_value(true);
 
- pros::delay(100);
+ pros::delay(120); //let the clamp fully actuate
 
- intake.move_voltage(12000);
+ conveyor.setIntake(400);
+ startIntake();
 
- pros::delay(350);
+ pros::delay(450); //give the pre load a moment 
 
                   /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
  drive.setCustomPID({ 0,  130,  0,   0,   0,  200,    0});
@@ -64,62 +72,244 @@ void winPointBlue(){
  drive.setScheduledConstants({ 0,   55,  0,  15,   0,  750,  0});
  drive.setScheduleThreshold_a(20);
  drive.setSlew(mogoProfile);
-                           
- /*IMPORTANT: two turns need tuned ig cause like weird friction */
 
- drive.turn(left, imuTarget(253), 2, 70);
-
+ drive.turn(left, imuTarget(250), 2, 70);
  
  drive.setPID(4);
  drive.setScheduledConstants(PIDConstants[5]);
- drive.addErrorFunc(6, LAMBDA(drive.setMaxVelocity(60)));
- drive.move(forward, 28, 2, 100);
+ drive.move(forward, 28, 2, 60);
 
                    /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
  drive.setCustomPID({ 0,   420,  0,   0,   0,  200,    0});
                            /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
  drive.setScheduledConstants({ 0,  190,  0,  15,   0,  700,  0});
-
+ 
  drive.turn(shortest, 50, 2, 70);
+ pros::delay(300); // give rimg some time
 
- pros::delay(1200);
+ drive.setPID(4);
+ drive.setScheduledConstants(PIDConstants[5]); 
 
- mogoMechPisses.set_value(false);
+ drive.addErrorFunc(22, LAMBDA(mogoMechPisses.set_value(false)));
+ drive.addErrorFunc(20, LAMBDA(drive.setPID(1)));
+ drive.addErrorFunc(20, LAMBDA(drive.setScheduledConstants(PIDConstants[4])));
+ drive.addErrorFunc(20, LAMBDA( drive.setSlew({0,0,0})));
+ drive.move(forward, 45, 2, 100);
  
- drive.setPID(8);
- drive.setScheduleThresholds_s(0, 10);
- drive.setScheduledSwerveConstants(PIDConstants[6]);
+ drive.setScheduleThreshold_a(15);
+ drive.turn(right, imuTarget(90), 1, 70);
  
- //170 degree angular movememt
- //brek out into 3 movements
- drive.swerve(forwardRight, 52, imuTarget(85), 3, 60, 6);
- 
- //break this down 
- drive.setPID(1);
- drive.setScheduledConstants(PIDConstants[4]);
- drive.move(forward, 20, 2, 60);
-
- pros::delay(2500);
- 
- drive.addErrorFunc(50, LAMBDA(intake.move_voltage(0)));
- drive.turn(right, imuTarget(145), 1, 70);
-
- lift.move_voltage(12000);
- pros::delay(200);
- lift.move_voltage(0);
+ drive.addErrorFunc(26, LAMBDA(drive.setMaxVelocity(70)));
+ drive.move(forward, 37, 4, 40);
 
  drive.setPID(2);
+ drive.setScheduleThreshold_a(NO_SCHEDULING);
  drive.setScheduleThreshold_l(NO_SCHEDULING);
- drive.move(backward, 16, 1, 100);
+
+ drive.turn(right, imuTarget(130), 1, 70);
+
+ drive.move(backward, 22, 1, 100);
+
+ stopIntake();
+
+ drive.move(forward, 5, 1, 100);
+
+ drive.turn(right, imuTarget(180), 1, 70);
+
+ lift.move_voltage(12000);
+ drive.addErrorFunc(2.5, LAMBDA(lift.move_voltage(0)));
+ drive.move(backward, 5, 1, 100);
+
+ startIntake();
+
+ pros::delay(300);
+ 
+ drive.addErrorFunc(8, LAMBDA(lift.move_voltage(-12000)));
+ drive.addErrorFunc(2, LAMBDA(lift.move_voltage(0)));
+ drive.move(forward, 12, 1, 100);
+  
+ drive.setPID(1);
+ drive.setScheduledConstants(PIDConstants[4]);
+ drive.setScheduleThreshold_a(15);
+ drive.setScheduleThreshold_l(10);
+ drive.turn(left, imuTarget(26), 2, 70);
+
+ drive.move(backward, 48, 2, 100);
+
+ drive.setPID(2);
+ drive.setScheduleThreshold_a(NO_SCHEDULING);
+ drive.setScheduleThreshold_l(NO_SCHEDULING);
+ drive.turn(left, imuTarget(310), 1, 70);
+ 
+ drive.move(backward, 8, 1, 100);
+
+ odomTask.remove();
+ runOnError.remove();
+ runIntakeControl.remove();
+ drive.onErrorVector.clear();
+}
+
+void ringSideRed(){
+ pros::Task odomTask(updateOdom_fn);
+ pros::Task runOnError(onError_fn);
+
+ odomTask.remove();
+ runOnError.remove();
+ drive.onErrorVector.clear();
+}
+
+void ringSideBlue(){
+ pros::Task odomTask(updateOdom_fn);
+ pros::Task runOnError(onError_fn);
+ pros::Task runIntakeControl(IntakeControlSystem_fn);
+
+ drive.setScheduleThreshold_a(15);
+ drive.setScheduleThreshold_l(10);
+ drive.setScheduledConstants(PIDConstants[4]);
+
+ drive.addErrorFunc(12, LAMBDA(drive.setMaxVelocity(25)));
+ drive.move(backward, 35, 2, 100);
+
+ mogoMechPisses.set_value(true);
+
+ pros::delay(150); //let the clamp fully actuate
+
+ conveyor.setIntake(400);
+ startIntake();
+
+ pros::delay(900); //give the pre load a moment 
+
+                  /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setCustomPID({ 0,  130,  0,   0,   0,  200,    0});
+                           /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setScheduledConstants({ 0,   55,  0,  15,   0,  750,  0});
+ drive.setScheduleThreshold_a(20);
+ drive.setSlew(mogoProfile);
+
+ drive.turn(left, imuTarget(250), 2, 70);
+ 
+ drive.setPID(4);
+ drive.setScheduledConstants(PIDConstants[5]);
+ drive.move(forward, 28, 2, 60);
+
+ odomTask.remove();
+ runOnError.remove();
+ runIntakeControl.remove();
+ drive.onErrorVector.clear();
+}
+
+void goalSideRed(){
+ pros::Task odomTask(updateOdom_fn);
+ pros::Task runOnError(onError_fn);
+ pros::Task runIntakeControl(IntakeControlSystem_fn);
+
+ drive.setScheduleThreshold_a(15);
+ drive.setScheduleThreshold_l(10);
+ drive.setScheduledConstants(PIDConstants[4]);
+
+ drive.addErrorFunc(12, LAMBDA(drive.setMaxVelocity(25)));
+ drive.move(backward, 35, 2, 100);
+
+ mogoMechPisses.set_value(true);
+
+ pros::delay(200); //let the clamp fully actuate
+
+ conveyor.setIntake(400);
+ startIntake();
+
+ pros::delay(1000); //give the pre load a moment 
+
+                  /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setCustomPID({ 0,  130,  0,   0,   0,  200,    0});
+                           /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setScheduledConstants({ 0,   55,  0,  15,   0,  750,  0});
+ drive.setScheduleThreshold_a(20);
+ drive.setSlew(mogoProfile);
+
+ drive.turn(left, imuTarget(250), 2, 70);
+ 
+ drive.setPID(4);
+ drive.setScheduledConstants(PIDConstants[5]);
+ drive.move(forward, 28, 2, 60);
 
  pros::delay(1500);
 
+ drive.move(backward, 32, 2, 100);
+ 
+ drive.setPID(4);
+ drive.setScheduledConstants(PIDConstants[5]);
+ drive.setScheduleThreshold_a(20);
+ drive.turn(right, imuTarget(310), 2, 70);
+
+ drive.move(backward, 22, 2, 100);
+
+ odomTask.remove();
+ runOnError.remove();
+ runIntakeControl.remove();
+ drive.onErrorVector.clear();
+}
+
+void goalSideBlue(){
+ pros::Task odomTask(updateOdom_fn);
+ pros::Task runOnError(onError_fn);
+ pros::Task runIntakeControl(IntakeControlSystem_fn);
+
+ drive.setScheduleThreshold_a(15);
+ drive.setScheduleThreshold_l(10);
+ drive.setScheduledConstants(PIDConstants[4]);
+
+ drive.addErrorFunc(12, LAMBDA(drive.setMaxVelocity(25)));
+ drive.move(backward, 35, 2, 100);
+
+ mogoMechPisses.set_value(true);
+
+ pros::delay(200); //let the clamp fully actuate
+
+ conveyor.setIntake(400);
+ startIntake();
+
+ pros::delay(1000); //give the pre load a moment 
+
+                  /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setCustomPID({ 0,  130,  0,   0,   0,  200,    0});
+                           /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setScheduledConstants({ 0,   55,  0,  15,   0,  750,  0});
+ drive.setScheduleThreshold_a(20);
+ drive.setSlew(mogoProfile);
+
+ drive.turn(right, imuTarget(110), 2, 70);
+ 
+ drive.setPID(4);
+ drive.setScheduledConstants(PIDConstants[5]);
+ drive.move(forward, 28, 2, 60);
+
+ pros::delay(1500);
+
+ drive.move(backward, 32, 2, 100);
+ 
+ drive.setPID(4);
+ drive.setScheduledConstants(PIDConstants[5]);
+ drive.setScheduleThreshold_a(20);
+ drive.turn(left, imuTarget(50), 2, 70);
+
+ drive.move(backward, 22, 2, 100);
+
+ odomTask.remove();
+ runOnError.remove();
+ runIntakeControl.remove();
+ drive.onErrorVector.clear();
+}
+
+void ringElimRed(){
+ pros::Task odomTask(updateOdom_fn);
+ pros::Task runOnError(onError_fn);
+
  odomTask.remove();
  runOnError.remove();
  drive.onErrorVector.clear();
 }
 
-void leftSideRed(){
+void ringElimBlue(){
  pros::Task odomTask(updateOdom_fn);
  pros::Task runOnError(onError_fn);
 
@@ -129,7 +319,7 @@ void leftSideRed(){
 }
 
 
-void leftSideBlue(){
+void goalElimRed(){
  pros::Task odomTask(updateOdom_fn);
  pros::Task runOnError(onError_fn);
 
@@ -138,53 +328,7 @@ void leftSideBlue(){
  drive.onErrorVector.clear();
 }
 
-void rightSideRed(){
- pros::Task odomTask(updateOdom_fn);
- pros::Task runOnError(onError_fn);
-
- odomTask.remove();
- runOnError.remove();
- drive.onErrorVector.clear();
-}
-
-void rightSideBlue(){
- pros::Task odomTask(updateOdom_fn);
- pros::Task runOnError(onError_fn);
-
- odomTask.remove();
- runOnError.remove();
- drive.onErrorVector.clear();
-}
-
-void leftElimRed(){
- pros::Task odomTask(updateOdom_fn);
- pros::Task runOnError(onError_fn);
-
- odomTask.remove();
- runOnError.remove();
- drive.onErrorVector.clear();
-}
-
-void leftElimBlue(){
- pros::Task odomTask(updateOdom_fn);
- pros::Task runOnError(onError_fn);
-
- odomTask.remove();
- runOnError.remove();
- drive.onErrorVector.clear();
-}
-
-
-void rightElimRed(){
- pros::Task odomTask(updateOdom_fn);
- pros::Task runOnError(onError_fn);
-
- odomTask.remove();
- runOnError.remove();
- drive.onErrorVector.clear();
-}
-
-void rightElimBlue(){
+void goalElimBlue(){
  pros::Task odomTask(updateOdom_fn);
  pros::Task runOnError(onError_fn);
 
@@ -216,13 +360,23 @@ void tune(){
 
  drive.setSlew(mogoProfile);
  */
- drive.setPID(8);
- drive.setScheduleThresholds_s(0, 10);
- drive.setScheduledSwerveConstants(PIDConstants[6]);
- 
- //170 degree angular movememt
- drive.swerve(forwardRight, 52, 40, 3, 60, 10);
- pros::delay(1000);
+  //  drive.setPID(8);
+  //  drive.setScheduleThresholds_s(0, 10);
+  //  drive.setScheduledSwerveConstants(PIDConstants[6]);
+  
+  //  //170 degree angular movememt
+  //  drive.swerve(forwardRight, 52, 40, 3, 60, 10);
+  //  pros::delay(1000);
+
+ drive.setPID(1);
+ drive.setScheduleThreshold_a(15);
+ drive.setScheduleThreshold_l(10);
+ drive.setScheduledConstants(PIDConstants[4]);
+
+ imu.set_heading(180);
+
+ drive.turn(left, imuTarget(26), 2, 70);
+
 
  /*
  drive.move(forward, 22, 1, 100);

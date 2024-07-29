@@ -6,8 +6,8 @@ Drive::Drive(pros::MotorGroup &leftMotors, pros::MotorGroup &rightMotors, pros::
  setScheduleThreshold_l(NO_SCHEDULING);
  setScheduleThreshold_a(NO_SCHEDULING);
 
- setSlew({0, 30, 80});
- setSlew_a({0, 30, 80});
+ setSlew({0, 0, 0});
+ setSlew_a({0, 0, 0});
 
  this->leftMotors      = &leftMotors;
  this->rightMotors     = &rightMotors;

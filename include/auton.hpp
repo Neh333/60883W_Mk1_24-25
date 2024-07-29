@@ -4,17 +4,17 @@
 void winPointRed();
 void winPointBlue();
 
-void leftSideRed();
-void leftSideBlue();
+void ringSideRed();
+void ringSideBlue();
 
-void rightSideRed();
-void rightSideBlue();
+void goalSideRed();
+void goalSideBlue();
 
-void leftElimRed();
-void leftElimBlue();
+void ringElimRed();
+void ringElimBlue();
 
-void rightElimRed();
-void rightElimBlue();
+void goalElimRed();
+void goalElimBlue();
 
 void skills();
 
