@@ -152,9 +152,49 @@ void winPointBlue(){
 void ringSideRed(){
  pros::Task odomTask(updateOdom_fn);
  pros::Task runOnError(onError_fn);
+ pros::Task runIntakeControl(IntakeControlSystem_fn);
+
+ drive.setScheduleThreshold_a(15);
+ drive.setScheduleThreshold_l(10);
+ drive.setScheduledConstants(PIDConstants[4]);
+
+ drive.addErrorFunc(12, LAMBDA(drive.setMaxVelocity(25)));
+ drive.move(backward, 35, 2, 100);
+
+ mogoMechPisses.set_value(true);
+
+ pros::delay(120); //let the clamp fully actuate
+
+ conveyor.setIntake(400);
+ startIntake();
+
+ pros::delay(450); //give the pre load a moment 
+
+                  /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setCustomPID({ 0,  130,  0,   0,   0,  200,    0});
+                           /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setScheduledConstants({ 0,   55,  0,  15,   0,  750,  0});
+ drive.setScheduleThreshold_a(20);
+ drive.setSlew(mogoProfile);
+
+ drive.turn(right, imuTarget(110), 2, 70);
+ 
+ drive.setPID(4);
+ drive.setScheduledConstants(PIDConstants[5]);
+ drive.move(forward, 28, 2, 60);
+ 
+                   /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ //drive.setCustomPID({ 0,   420,  0,   0,   0,  200,    0});
+                           /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ //drive.setScheduledConstants({ 0,  190,  0,  15,   0,  700,  0});
+ 
+ //drive.turn(shortest, 50, 2, 70);
+ pros::delay(1000); // give rimg some time
+ 
 
  odomTask.remove();
  runOnError.remove();
+ runIntakeControl.remove();
  drive.onErrorVector.clear();
 }
 
@@ -207,12 +247,11 @@ void goalSideRed(){
  drive.setScheduleThreshold_l(10);
  drive.setScheduledConstants(PIDConstants[4]);
 
- drive.addErrorFunc(12, LAMBDA(drive.setMaxVelocity(25)));
- drive.move(backward, 35, 2, 100);
+ drive.move(backward, 35, 2, 60);
 
  mogoMechPisses.set_value(true);
 
- pros::delay(200); //let the clamp fully actuate
+ pros::delay(150); //let the clamp fully actuate
 
  conveyor.setIntake(400);
  startIntake();
@@ -220,13 +259,15 @@ void goalSideRed(){
  pros::delay(1000); //give the pre load a moment 
 
                   /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
- drive.setCustomPID({ 0,  130,  0,   0,   0,  200,    0});
+ //drive.setCustomPID({ 0,  130,  0,   0,   0,  200,    0});
                            /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
- drive.setScheduledConstants({ 0,   55,  0,  15,   0,  750,  0});
+ //drive.setScheduledConstants({ 0,   55,  0,  15,   0,  750,  0});
+ drive.setPID(4);
+ drive.setScheduledConstants(PIDConstants[5]);
  drive.setScheduleThreshold_a(20);
  drive.setSlew(mogoProfile);
 
- drive.turn(left, imuTarget(250), 2, 70);
+ drive.turn(left, imuTarget(252), 2, 70);
  
  drive.setPID(4);
  drive.setScheduledConstants(PIDConstants[5]);
@@ -241,7 +282,7 @@ void goalSideRed(){
  drive.setScheduleThreshold_a(20);
  drive.turn(right, imuTarget(310), 2, 70);
 
- drive.move(backward, 22, 2, 100);
+ drive.move(backward, 15, 2, 100);
 
  odomTask.remove();
  runOnError.remove();
@@ -258,14 +299,13 @@ void goalSideBlue(){
  drive.setScheduleThreshold_l(10);
  drive.setScheduledConstants(PIDConstants[4]);
 
- drive.addErrorFunc(12, LAMBDA(drive.setMaxVelocity(25)));
- drive.move(backward, 35, 2, 100);
+ drive.move(backward, 34, 4, 65);
 
  mogoMechPisses.set_value(true);
 
  pros::delay(200); //let the clamp fully actuate
 
- conveyor.setIntake(400);
+ conveyor.setIntake(350);
  startIntake();
 
  pros::delay(1000); //give the pre load a moment 
@@ -277,22 +317,23 @@ void goalSideBlue(){
  drive.setScheduleThreshold_a(20);
  drive.setSlew(mogoProfile);
 
- drive.turn(right, imuTarget(110), 2, 70);
+ drive.turn(right, imuTarget(108), 2, 70);
+
+ conveyor.setIntake(400);
  
  drive.setPID(4);
  drive.setScheduledConstants(PIDConstants[5]);
- drive.move(forward, 28, 2, 60);
+ drive.move(forward, 25, 2, 60);
 
  pros::delay(1500);
 
- drive.move(backward, 32, 2, 100);
- 
- drive.setPID(4);
- drive.setScheduledConstants(PIDConstants[5]);
- drive.setScheduleThreshold_a(20);
- drive.turn(left, imuTarget(50), 2, 70);
-
  drive.move(backward, 22, 2, 100);
+ 
+ drive.turn(left, imuTarget(40), 2, 70);
+
+ drive.move(backward, 25, 3, 100);
+
+ stopIntake();
 
  odomTask.remove();
  runOnError.remove();
@@ -318,7 +359,6 @@ void ringElimBlue(){
  drive.onErrorVector.clear();
 }
 
-
 void goalElimRed(){
  pros::Task odomTask(updateOdom_fn);
  pros::Task runOnError(onError_fn);
@@ -341,6 +381,8 @@ void goalElimBlue(){
 void skills(){
  pros::Task odomTask(updateOdom_fn);
  pros::Task runOnError(onError_fn);
+
+
 
  odomTask.remove();
  runOnError.remove();
