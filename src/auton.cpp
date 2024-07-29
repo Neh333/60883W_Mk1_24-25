@@ -258,31 +258,32 @@ void goalSideRed(){
 
  pros::delay(1000); //give the pre load a moment 
 
+
+ 
                   /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
- //drive.setCustomPID({ 0,  130,  0,   0,   0,  200,    0});
+ drive.setCustomPID({ 0,  130,  0,   0,   0,  200,    0});
                            /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
- //drive.setScheduledConstants({ 0,   55,  0,  15,   0,  750,  0});
- drive.setPID(4);
- drive.setScheduledConstants(PIDConstants[5]);
+ drive.setScheduledConstants({ 0,   55,  0,  15,   0,  750,  0});
  drive.setScheduleThreshold_a(20);
  drive.setSlew(mogoProfile);
 
+
  drive.turn(left, imuTarget(252), 2, 70);
  
+  
  drive.setPID(4);
  drive.setScheduledConstants(PIDConstants[5]);
  drive.move(forward, 28, 2, 60);
 
  pros::delay(1500);
 
- drive.move(backward, 32, 2, 100);
+ drive.move(backward, 22, 2, 100);
  
- drive.setPID(4);
- drive.setScheduledConstants(PIDConstants[5]);
- drive.setScheduleThreshold_a(20);
- drive.turn(right, imuTarget(310), 2, 70);
+ drive.turn(right, imuTarget(320), 2, 70);
 
- drive.move(backward, 15, 2, 100);
+ drive.move(backward, 25, 2, 100);
+
+ stopIntake();
 
  odomTask.remove();
  runOnError.remove();
