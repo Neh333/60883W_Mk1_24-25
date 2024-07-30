@@ -163,12 +163,12 @@ void ringSideRed(){
 
  mogoMechPisses.set_value(true);
 
- pros::delay(120); //let the clamp fully actuate
+ pros::delay(150); //let the clamp fully actuate
 
  conveyor.setIntake(400);
  startIntake();
 
- pros::delay(450); //give the pre load a moment 
+ pros::delay(900); //give the pre load a moment 
 
                   /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
  drive.setCustomPID({ 0,  130,  0,   0,   0,  200,    0});
@@ -181,15 +181,24 @@ void ringSideRed(){
  
  drive.setPID(4);
  drive.setScheduledConstants(PIDConstants[5]);
- drive.move(forward, 28, 2, 60);
- 
-                   /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
- //drive.setCustomPID({ 0,   420,  0,   0,   0,  200,    0});
-                           /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
- //drive.setScheduledConstants({ 0,  190,  0,  15,   0,  700,  0});
- 
- //drive.turn(shortest, 50, 2, 70);
- pros::delay(1000); // give rimg some time
+ drive.move(forward, 27, 2, 60);
+
+ drive.turn(right, imuTarget(198), 2, 70);
+
+ pros::delay(1000);
+
+ drive.move(forward, 20, 1, 55);
+
+ drive.move(backward, 30, 3, 100);
+
+ drive.turn(shortest, 301, 3, 70);
+
+ drive.move(backward, 42, 3, 100);
+
+ odomTask.remove();
+ runOnError.remove();
+ runIntakeControl.remove();
+ drive.onErrorVector.clear();
  
 
  odomTask.remove();
@@ -230,7 +239,19 @@ void ringSideBlue(){
  
  drive.setPID(4);
  drive.setScheduledConstants(PIDConstants[5]);
- drive.move(forward, 28, 2, 60);
+ drive.move(forward, 27, 2, 60);
+
+ drive.turn(left, imuTarget(162), 2, 70);
+
+ pros::delay(1000);
+
+ drive.move(forward, 20, 1, 55);
+
+ drive.move(backward, 30, 3, 100);
+
+ drive.turn(shortest, 301, 3, 70);
+
+ drive.move(backward, 42, 3, 100);
 
  odomTask.remove();
  runOnError.remove();
@@ -258,8 +279,6 @@ void goalSideRed(){
 
  pros::delay(1000); //give the pre load a moment 
 
-
- 
                   /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
  drive.setCustomPID({ 0,  130,  0,   0,   0,  200,    0});
                            /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
@@ -267,9 +286,7 @@ void goalSideRed(){
  drive.setScheduleThreshold_a(20);
  drive.setSlew(mogoProfile);
 
-
  drive.turn(left, imuTarget(252), 2, 70);
- 
   
  drive.setPID(4);
  drive.setScheduledConstants(PIDConstants[5]);
