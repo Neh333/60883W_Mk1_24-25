@@ -17,8 +17,6 @@ void goalElimRed();
 void goalElimBlue();
 
 void skills();
-
-void nothing();
 void tune();
 
 extern std::function<void()> autos[AUTO_NUMBER];

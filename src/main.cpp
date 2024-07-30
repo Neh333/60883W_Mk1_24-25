@@ -3,7 +3,6 @@
 #include "include.hpp"
 #include "pros/rtos.hpp"
 #include "lvgl_funcs.hpp"
-
 uint8_t auton = AUTO_NUMBER; 
 
 #define AUTO_SWITCH(){ \
@@ -19,8 +18,7 @@ uint8_t auton = AUTO_NUMBER;
 		case 8:  controller.print(2, 0, "GoalE-R %.2f   ",imu.get_heading()); break;\
     case 9:  controller.print(2, 0, "GoalE-B %.2f   ",imu.get_heading()); break;\
     case 10: controller.print(2, 0, "Skills   %.2f   ",imu.get_heading()); break;\
-		case 11: controller.print(2, 0, "Nothing  %.2f   ",imu.get_heading()); break;\
-    case 12: controller.print(2, 0, "Tune     %.2f   ",imu.get_heading()); break;\
+    case 11: controller.print(2, 0, "Tune     %.2f   ",imu.get_heading()); break;\
 	}\
 }\
 

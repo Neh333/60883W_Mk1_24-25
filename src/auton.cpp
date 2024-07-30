@@ -27,7 +27,6 @@ std::function<void()> autos[AUTO_NUMBER] = {
   {goalElimBlue},
 
   {skills},
-  {nothing},
   {tune}
 };
 
@@ -488,14 +487,15 @@ void skills(){
  drive.setScheduleThreshold_l(NO_SCHEDULING);
  drive.setScheduleThreshold_a(NO_SCHEDULING);
  drive.move(forward, 2, 1, 100);
-
+ 
+ //20 deg turn go brrrrr
  drive.turn(right, imuTarget(270), 1, 100);
 
  drive.setPID(1);
  drive.setScheduleThreshold_a(15);
  drive.setScheduleThreshold_l(10);
 
- drive.move(forward, 72, 4, 70);
+ drive.move(forward, 72, 4, 100);
 
  drive.turn(right, imuTarget(360), 1, 100);
 
@@ -537,13 +537,11 @@ void tune(){
   //  drive.swerve(forwardRight, 52, 40, 3, 60, 10);
   //  pros::delay(1000);
 
- drive.setPID(4);
- drive.setScheduleThreshold_a(20);
- drive.setScheduledConstants(PIDConstants[5]);
 
- imu.set_heading(180);
-
- drive.turn(left, imuTarget(26), 2, 70);
+                  /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setCustomPID({0,   200,  0,  0,  500,    0,   0});
+ drive.turn(right, 20, 2, 70);
+ pros::delay(2000);
 
 
  /*
@@ -553,7 +551,7 @@ void tune(){
  pros::delay(1000);
  drive.move(forward, 42, 2, 100);
  pros::delay(2000);
- */ 
+ 
  
  
  //  drive.turn(right, 50, 1, 70);
@@ -586,8 +584,6 @@ void tune(){
 
  drive.turn(right, 180, 2, 70);
  pros::delay(1000);
-
- /*
 
  drive.turn(right, 195, 2, 70);
  pros::delay(1000);

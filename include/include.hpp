@@ -4,7 +4,7 @@
 #define MIN(a,b) ((a)<(b)?(a):(b)) //takes param "A" & "B" if A is less than B then A if not then B 
 #define MAX(a,b) ((a)>(b)?(a):(b)) //takes param "A" & "B" if A is greather than than B then A if not then B 
 
-#define AUTO_NUMBER 13 //can'tused static types for array len
+#define AUTO_NUMBER 12 //can'tused static types for array len or const uint soo womp cope 
 extern uint8_t auton; 
 
 extern pros::Controller controller;
