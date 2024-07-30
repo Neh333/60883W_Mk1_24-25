@@ -406,13 +406,13 @@ void skills(){
 
  startIntake();
 
+ pros::delay(1000); // intake copuim
+
  drive.setSlew(mogoProfile);
  drive.setPID(4);
  drive.setScheduleThreshold_a(20);
 
  drive.move(backward, 10, 1, 100);
-
- pros::delay(800);
 
  //fuck rings 
                     /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
@@ -427,7 +427,7 @@ void skills(){
  drive.addErrorFunc(8, LAMBDA(drive.setMaxVelocity(80)));
  drive.move(forward, 30, 3, 100);
 
- pros::delay(800);
+ pros::delay(1000); //rings are pain 
  
                   /*{kP,   kPa, kI, kIa,  kD,  kDa,  kPd}*/
  drive.setCustomPID({ 0,   250,  0,   0,   0,  200,    0});
@@ -444,68 +444,71 @@ void skills(){
                   /*{kP,   kPa, kI, kIa,  kD,  kDa,  kPd}*/
  drive.setCustomPID({ 0,   200,  0,   0,   0,  200,    0});
                            /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
- drive.setScheduledConstants({ 0,  120,  0,  15,   0,  300,  0});
+ drive.setScheduledConstants({ 0,  125,  0,  15,   0,  320,  0});
 
- drive.turn(left, imuTarget(30), 1, 70);
+ drive.turn(left, imuTarget(32), 1, 70);
 
- pros::delay(2000); //letrings get on just in case intake sell 
+ pros::delay(1500); //let rings get on just in case intake sell 
  
  drive.setPID(4);
  drive.setScheduledConstants(PIDConstants[5]);
- drive.addErrorFunc(6, LAMBDA(drive.setMaxVelocity(80)));
+ drive.addErrorFunc(6, LAMBDA(drive.setMaxVelocity(70)));
  drive.move(forward, 30, 3, 100);
 
  drive.move(backward, 26, 3, 100);
 
                    /*{kP,   kPa, kI, kIa,  kD,  kDa,  kPd}*/
- drive.setCustomPID({ 0,    400,  0,   0,   0,  200,    0});
+ drive.setCustomPID({ 0,    450,  0,   0,   0,  200,    0});
                            /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
- drive.setScheduledConstants({ 0,  200,  0,  15,   0,  300,  0});
+ drive.setScheduledConstants({ 0,  220,  0,  0,   0,  300,  0});
  drive.turn(left, imuTarget(0), 2, 70);
 
- pros::delay(2000); //test
+ pros::delay(1000); //let rings go on 
  
  drive.setPID(4);
  drive.setScheduledConstants(PIDConstants[5]);
- drive.addErrorFunc(22, LAMBDA(drive.setMaxVelocity(80)));
- drive.move(forward, 44, 6, 100);
- 
-                   /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
- drive.setCustomPID({ 0,   420,  0,   0,   0,  200,    0});
-                           /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}
- drive.setScheduledConstants({ 0,  190,  0,  15,   0,  700,  0});
- drive.turn(left, imuTarget(255), 2, 70);
+ drive.move(forward, 36, 6, 55);
 
- pros::delay(1500); //testing 
+ pros::delay(1000); //let last ring get on conveyer
+
+                   /*{kP,   kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setCustomPID({ 0,   250,  0,   0,   0,  200,    0});
+                           /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setScheduledConstants({ 0,  190,  0,  15,   0,  600,  0});
+ drive.turn(left, imuTarget(250), 1, 100);
 
  drive.setPID(4);
  drive.setScheduledConstants(PIDConstants[5]);
- drive.move(backward, 20, 1, 100);
+ drive.move(backward, 22, 1, 100);
 
  mogoMechPisses.set_value(false);
+ pros::delay(200);
 
- 
- 
- drive.setPID(1);
- drive.setScheduleThreshold_a(15);
- drive.setScheduledConstants(PIDConstants[4]);
-
- drive.move(forward, 32, 3, 100);
- 
  drive.setPID(2);
+ drive.setScheduleThreshold_l(NO_SCHEDULING);
  drive.setScheduleThreshold_a(NO_SCHEDULING);
+ drive.move(forward, 2, 1, 100);
+
  drive.turn(right, imuTarget(270), 1, 100);
- 
+
  drive.setPID(1);
  drive.setScheduleThreshold_a(15);
- 
- drive.move(forward, 48, 3, 100);
+ drive.setScheduleThreshold_l(10);
 
+ drive.move(forward, 72, 4, 70);
 
- stopIntake();
- */
+ drive.turn(right, imuTarget(360), 1, 100);
 
- 
+ drive.move(backward, 3, 1, 100);
+
+ mogoMechPisses.set_value(true);
+ pros::delay(150);
+
+ drive.setSlew(mogoProfile);
+ drive.setPID(4);
+ drive.setScheduleThreshold_a(20);
+ drive.setScheduledConstants(PIDConstants[5]);
+ drive.move(backward, 10, 1, 100);
 
  runOnError.remove();
  odomTask.remove();
