@@ -159,7 +159,7 @@ void ringSideRed(){
  drive.setScheduledConstants(PIDConstants[4]);
 
  drive.addErrorFunc(12, LAMBDA(drive.setMaxVelocity(25)));
- drive.move(backward, 35, 2, 100);
+ drive.move(backward, 36, 2, 100);
 
  mogoMechPisses.set_value(true);
 
@@ -187,19 +187,13 @@ void ringSideRed(){
 
  pros::delay(1000);
 
- drive.move(forward, 20, 1, 55);
+ drive.move(forward, 18, 1, 55);
 
  drive.move(backward, 30, 3, 100);
 
- drive.turn(shortest, 301, 3, 70);
+ drive.turn(left, imuTarget(68), 3, 70);
 
- drive.move(backward, 42, 3, 100);
-
- odomTask.remove();
- runOnError.remove();
- runIntakeControl.remove();
- drive.onErrorVector.clear();
- 
+ drive.move(backward, 44, 3, 100);
 
  odomTask.remove();
  runOnError.remove();
