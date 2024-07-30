@@ -388,8 +388,10 @@ void goalElimBlue(){
  runOnError.remove();
  drive.onErrorVector.clear();
 }
-
-
+                          /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+PIDprofile deg90RingConsts{ 0,   250,  0,   0,   0,  200,    0};
+                           /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+PIDprofile deg90RingScheduledConsts{ 0,  190,  0,  15,   0,  600,  0};
 void skills(){
  pros::Task odomTask(updateOdom_fn);
  pros::Task runOnError(onError_fn);
@@ -414,7 +416,6 @@ void skills(){
  drive.move(backward, 10, 1, 100);
 
  //fuck rings 
-                    /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
  drive.setCustomPID({ 0,    100,  0,   0,   0,  200,    0});
                            /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
  drive.setScheduledConstants({ 0,   28,  0,  16,   0,  750,  0});
@@ -428,11 +429,8 @@ void skills(){
 
  pros::delay(1000); //rings are pain 
  
-                  /*{kP,   kPa, kI, kIa,  kD,  kDa,  kPd}*/
- drive.setCustomPID({ 0,   250,  0,   0,   0,  200,    0});
-                           /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
- drive.setScheduledConstants({ 0,  190,  0,  15,   0,  600,  0});
-
+ drive.setCustomPID(deg90RingConsts);
+ drive.setScheduledConstants(deg90RingScheduledConsts);
  drive.turn(left, imuTarget(90), 2, 70);
  
  drive.setPID(4);
@@ -466,7 +464,11 @@ void skills(){
  
  drive.setPID(4);
  drive.setScheduledConstants(PIDConstants[5]);
- drive.move(forward, 36, 6, 55);
+ drive.move(forward, 24, 3, 50);
+
+ pros::delay(1000); //get first ring 
+
+ drive.move(forward, 12, 2, 50); //get 2nd ring 
 
  pros::delay(1000); //let last ring get on conveyer
 
@@ -474,41 +476,99 @@ void skills(){
  drive.setCustomPID({ 0,   250,  0,   0,   0,  200,    0});
                            /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
  drive.setScheduledConstants({ 0,  190,  0,  15,   0,  600,  0});
- drive.turn(left, imuTarget(250), 1, 100);
+ drive.turn(left, imuTarget(250), 2, 100);
 
  drive.setPID(4);
  drive.setScheduledConstants(PIDConstants[5]);
- drive.move(backward, 22, 1, 100);
+ drive.move(backward, 20, 2, 100);
+
+ pros::delay(1300); //let everything score
 
  mogoMechPisses.set_value(false);
  pros::delay(200);
 
+ //end of 1st part
+ 
+
+ //go for 2nd mogo 
  drive.setPID(2);
  drive.setScheduleThreshold_l(NO_SCHEDULING);
  drive.setScheduleThreshold_a(NO_SCHEDULING);
  drive.move(forward, 2, 1, 100);
  
  //20 deg turn go brrrrr
+                  /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setCustomPID({0,   212,  0,   0,   0,  390,   0});
  drive.turn(right, imuTarget(270), 1, 100);
 
  drive.setPID(1);
+ drive.setScheduledConstants(PIDConstants[4]);
  drive.setScheduleThreshold_a(15);
  drive.setScheduleThreshold_l(10);
 
- drive.move(forward, 72, 4, 100);
+ drive.move(forward, 76, 10, 100);
 
- drive.turn(right, imuTarget(360), 1, 100);
+ drive.turn(shortest, 65, 1, 100);
 
- drive.move(backward, 3, 1, 100);
+ drive.setPID(2);
+ drive.setScheduleThreshold_l(NO_SCHEDULING);
+ drive.setScheduleThreshold_a(NO_SCHEDULING);
+ drive.move(backward, 12, 1, 100);
 
  mogoMechPisses.set_value(true);
  pros::delay(150);
 
- drive.setSlew(mogoProfile);
  drive.setPID(4);
- drive.setScheduleThreshold_a(20);
  drive.setScheduledConstants(PIDConstants[5]);
- drive.move(backward, 10, 1, 100);
+ drive.setScheduleThreshold_l(10);
+ drive.setScheduleThreshold_a(20);
+ drive.setSlew(mogoProfile);
+
+ drive.move(backward, 12, 1, 100);
+ 
+ //110 deg turn 
+              /*{kP,   kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setCustomPID({ 0,   240,  0,   0,   0,  200,    0});
+                           /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setScheduledConstants({ 0,  205,  0,  15,   0,  730,  0});
+ drive.turn(left, imuTarget(303), 2, 70);
+
+ pros::delay(1500); //testing 
+
+ drive.setPID(4);
+ drive.setScheduledConstants(PIDConstants[5]);
+ drive.move(forward, 24, 2, 70);
+
+ pros::delay(800); //let ring on conveyer 
+
+ drive.turn(left, imuTarget(240), 2, 70); 
+
+ pros::delay(1500); //testing 
+
+ drive.move(forward, 12, 2, 70);
+
+ pros::delay(800); //get ring on conveyer 
+
+ drive.move(backward, 32, 2, 100);
+
+ drive.turn(left, imuTarget(180), 2, 70); 
+
+ drive.move(forward, 24, 3, 50);
+
+ pros::delay(1000); //get first ring 
+
+ drive.move(forward, 18, 2, 70); //get 2nd ring 
+ 
+ //90 deg turn 
+ drive.setCustomPID(deg90RingConsts);
+ drive.setScheduledConstants(deg90RingScheduledConsts);
+ drive.turn(left, imuTarget(270), 2, 70);
+
+ drive.setPID(4);
+ drive.setScheduledConstants(PIDConstants[5]);
+
+ drive.move(forward, 32, 2, 100);
+
 
  runOnError.remove();
  odomTask.remove();
@@ -536,12 +596,6 @@ void tune(){
   //  //170 degree angular movememt
   //  drive.swerve(forwardRight, 52, 40, 3, 60, 10);
   //  pros::delay(1000);
-
-
-                  /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
- drive.setCustomPID({0,   200,  0,  0,  500,    0,   0});
- drive.turn(right, 20, 2, 70);
- pros::delay(2000);
 
 
  /*
