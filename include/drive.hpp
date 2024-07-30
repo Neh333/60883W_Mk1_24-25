@@ -75,7 +75,7 @@ const PIDprofile PIDConstants[9] = {
    
   {20,  150, 0,  0, 150, 430,      0},/*scheduled for profile 1, starting at 15 deg and 10 in of error*/
 
-  {30,  140, 0, 18, 100, 547,     20},/*scheduled for profile 4, starting at 20 deg and 10 in of error*/
+  {30,  140, 0, 17, 100, 560,     20},/*scheduled for profile 4, starting at 20 deg and 10 in of error*/
 
   {10,   90,  0, 0,   0,  400,     0},/*scheduled for profile 8, at 15 deg & 10 in of erorr*/
  

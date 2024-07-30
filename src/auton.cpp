@@ -1,5 +1,6 @@
 #include "drive.hpp"
 #include "include.hpp"
+#include "liblvgl/misc/lv_anim.h"
 #include "pros/motors.h"
 #include "pros/rtos.h"
 #include "pros/rtos.hpp"
@@ -393,11 +394,122 @@ void goalElimBlue(){
 void skills(){
  pros::Task odomTask(updateOdom_fn);
  pros::Task runOnError(onError_fn);
+ pros::Task runIntakeControl(IntakeControlSystem_fn);
+
+ conveyor.setIntake(400);
+ drive.setPID(2);
+
+ drive.move(backward, 3, 1, 100);
+
+ mogoMechPisses.set_value(true);
+ pros::delay(150);
+
+ startIntake();
+
+ drive.setSlew(mogoProfile);
+ drive.setPID(4);
+ drive.setScheduleThreshold_a(20);
+
+ drive.move(backward, 10, 1, 100);
+
+ pros::delay(800);
+
+ //fuck rings 
+                    /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setCustomPID({ 0,    100,  0,   0,   0,  200,    0});
+                           /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setScheduledConstants({ 0,   28,  0,  16,   0,  750,  0});
+ drive.turn(shortest, 180, 1, 70);
+ 
+ drive.setPID(4);
+ drive.setScheduledConstants(PIDConstants[5]);
+ drive.setScheduleThreshold_l(10);
+ drive.addErrorFunc(8, LAMBDA(drive.setMaxVelocity(80)));
+ drive.move(forward, 30, 3, 100);
+
+ pros::delay(800);
+ 
+                  /*{kP,   kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setCustomPID({ 0,   250,  0,   0,   0,  200,    0});
+                           /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setScheduledConstants({ 0,  190,  0,  15,   0,  600,  0});
+
+ drive.turn(left, imuTarget(90), 2, 70);
+ 
+ drive.setPID(4);
+ drive.setScheduledConstants(PIDConstants[5]);
+ drive.move(forward, 24, 2, 100);
+ 
+ 
+                  /*{kP,   kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setCustomPID({ 0,   200,  0,   0,   0,  200,    0});
+                           /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setScheduledConstants({ 0,  120,  0,  15,   0,  300,  0});
+
+ drive.turn(left, imuTarget(30), 1, 70);
+
+ pros::delay(2000); //letrings get on just in case intake sell 
+ 
+ drive.setPID(4);
+ drive.setScheduledConstants(PIDConstants[5]);
+ drive.addErrorFunc(6, LAMBDA(drive.setMaxVelocity(80)));
+ drive.move(forward, 30, 3, 100);
+
+ drive.move(backward, 26, 3, 100);
+
+                   /*{kP,   kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setCustomPID({ 0,    400,  0,   0,   0,  200,    0});
+                           /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setScheduledConstants({ 0,  200,  0,  15,   0,  300,  0});
+ drive.turn(left, imuTarget(0), 2, 70);
+
+ pros::delay(2000); //test
+ 
+ drive.setPID(4);
+ drive.setScheduledConstants(PIDConstants[5]);
+ drive.addErrorFunc(22, LAMBDA(drive.setMaxVelocity(80)));
+ drive.move(forward, 44, 6, 100);
+ 
+                   /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}*/
+ drive.setCustomPID({ 0,   420,  0,   0,   0,  200,    0});
+                           /*{kP,  kPa, kI, kIa,  kD,  kDa,  kPd}
+ drive.setScheduledConstants({ 0,  190,  0,  15,   0,  700,  0});
+ drive.turn(left, imuTarget(255), 2, 70);
+
+ pros::delay(1500); //testing 
+
+ drive.setPID(4);
+ drive.setScheduledConstants(PIDConstants[5]);
+ drive.move(backward, 20, 1, 100);
+
+ mogoMechPisses.set_value(false);
+
+ 
+ 
+ drive.setPID(1);
+ drive.setScheduleThreshold_a(15);
+ drive.setScheduledConstants(PIDConstants[4]);
+
+ drive.move(forward, 32, 3, 100);
+ 
+ drive.setPID(2);
+ drive.setScheduleThreshold_a(NO_SCHEDULING);
+ drive.turn(right, imuTarget(270), 1, 100);
+ 
+ drive.setPID(1);
+ drive.setScheduleThreshold_a(15);
+ 
+ drive.move(forward, 48, 3, 100);
 
 
+ stopIntake();
+ */
 
- odomTask.remove();
+ 
+
  runOnError.remove();
+ odomTask.remove();
+ runIntakeControl.remove();
  drive.onErrorVector.clear();
 }
 
@@ -422,10 +534,9 @@ void tune(){
   //  drive.swerve(forwardRight, 52, 40, 3, 60, 10);
   //  pros::delay(1000);
 
- drive.setPID(1);
- drive.setScheduleThreshold_a(15);
- drive.setScheduleThreshold_l(10);
- drive.setScheduledConstants(PIDConstants[4]);
+ drive.setPID(4);
+ drive.setScheduleThreshold_a(20);
+ drive.setScheduledConstants(PIDConstants[5]);
 
  imu.set_heading(180);
 
@@ -440,10 +551,10 @@ void tune(){
  drive.move(forward, 42, 2, 100);
  pros::delay(2000);
  */ 
- /*x
  
- drive.turn(right, 50, 1, 70);
- pros::delay(1000);
+ 
+ //  drive.turn(right, 50, 1, 70);
+ //  pros::delay(1000);
 
  drive.turn(right, 60, 1, 70);
  pros::delay(1000);
@@ -473,12 +584,14 @@ void tune(){
  drive.turn(right, 180, 2, 70);
  pros::delay(1000);
 
+ /*
+
  drive.turn(right, 195, 2, 70);
  pros::delay(1000);
 
  drive.turn(right, 205, 2, 70);
  pros::delay(1000);
-   */
+    */
 
  
 
