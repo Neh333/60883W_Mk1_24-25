@@ -253,7 +253,7 @@ void ringSideBlue(){
 
  drive.turn(shortest, 301, 3, 70);
 
- drive.move(backward, 42, 3, 100);
+ drive.move(backward, 52, 10, 100);
 
  odomTask.remove();
  runOnError.remove();
@@ -270,7 +270,7 @@ void goalSideRed(){
  drive.setScheduleThreshold_l(10);
  drive.setScheduledConstants(PIDConstants[4]);
 
- drive.move(backward, 35, 2, 60);
+ drive.move(backward, 34, 2, 60);
 
  mogoMechPisses.set_value(true);
 
@@ -300,7 +300,7 @@ void goalSideRed(){
  
  drive.turn(right, imuTarget(320), 2, 70);
 
- drive.move(backward, 32, 2, 100);
+ drive.move(backward, 26, 2, 100);
 
  stopIntake();
 
@@ -343,7 +343,7 @@ void goalSideBlue(){
  
  drive.setPID(4);
  drive.setScheduledConstants(PIDConstants[5]);
- drive.move(forward, 25, 2, 60);
+ drive.move(forward, 28, 2, 60);
 
  pros::delay(1500);
 
@@ -351,7 +351,7 @@ void goalSideBlue(){
  
  drive.turn(left, imuTarget(40), 2, 70);
 
- drive.move(backward, 32, 3, 100);
+ drive.move(backward, 26, 3, 100);
 
  stopIntake();
 
